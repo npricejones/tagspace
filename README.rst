@@ -3,6 +3,7 @@ tagspace
 Package to generate synthetic chemical space and identify clusters in a parallel way.
 
 .. contents::
+.. higlight:: python
 
 AUTHOR
 ======
