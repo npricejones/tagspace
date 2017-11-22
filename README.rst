@@ -128,19 +128,36 @@ Using chemical abundances as axes is the most common and straightforward approac
 Spectra
 +++++++
 
-``tagspace`` supports two ways of generating spectra of stars to be members of a cluster. Assuming we already have a ``makeclusters`` object called ``clusters`` (as we created in the previous subsection), we can follow two possible paths to create member spectra. The first approach begins by generating abundances, then using those to create spectra. Start by identifying abundances.
+``tagspace`` supports two ways of generating spectra of stars to be members of a cluster. As in the previous section, we'll begin by creating a ``makeclusters`` object called ``clusters``. We will use the same simple case described above to find our cluster centers.
+::		
+		import numpy as np
+		from tagspace.clusters.makeclusters import makeclusters, normalgeneration, uniformgeneration
+		clusters = makeclusters(genfn=normalgeneration,num = 20, means = np.zeros(10), stds = 0.5*np.ones(10))
+
+
+It is now necessary to specify photospheric parameters of our stars so we can generate the spectra. Unlike chemical abundances we do not expect these parameters to be similar for members of the same clusters. There are few options for how to get these parameters. If we already have this information, we can add it to our clusters information by passing it as a structured array to ``updateinfo``.
+::
+		clusters.updateinfo(<structured array of star information>)
+
+The structured array must have labels ``'TEFF'``, ``'LOGG'`` and ``'VTURB'``.  The above is a convenience function; we could also have set ``clusters.spectra.teff``, ``clusters.spectra.logg`` and ``clusters.spectra.vturb`` to the appropriate values.
+
+We have two other options to create the photospheric parameters - we can choose them in a related way with ``choosephotosphere`` or we can choose them independently using the function for each (e.g. ``chooseteff`` for selecting effective temperatures). For simplicity, let's choose the photospheric parameters simultaneously from a uniform distribution.
+::
+		clusters.choosephotosphere(genfn=uniformgeneration,bounds={'TEFF':[4000,5000],'LOGG':[2.0,4.0],'VTURB:[0.5,3.0]'})
+
+Our first approach to generating member spectra begins by generating abundances and using those to create spectra. Start by identifying abundances.
 ::
 		clusters.create_abundances(genfn = normalgeneration, num = 15, means = cluster.centers, stds = 0.05*np.ones(10),atmnum=[6,7,8,11,12,13,14,16,20,26])
 
-We have added a new kwarg to ``create_abundances``; ``atmnum`` specifies which elements we are generating, since this is needed for spectra generation.
-
-It is now necessary to specify other parameters of the stars so we can generate the spectra. Unlike chemical abundances we do not expect these parameters to be similar for cluster members. 
-
+We have added a new kwarg to ``create_abundances``; ``atmnum`` specifies which elements we are generating, since this is needed for spectra generation. We now have everything we need to create the spectra.
+::
 		clusters.create_spectra_abundances()
 
 Alternatively, we can create a spectrum for each cluster center and vary it according to a generation function, in much the same way as we chose members in abundance space:
 ::
 		cluster.create_spectra(genfn = normalgeneration, num = 15, means = cluster.centers, stds = 0.01*np.ones(10))
+
+Finding clusters in spectral space is then a matter giving our cluster data to ``tag`` as before.
 
 
 Fitting spectra
@@ -150,7 +167,7 @@ Once spectra have been created, their use in chemical tagging can be improved by
 ::
 		clusters.spectra.fit(fitfn=polynomial,degree=2,variables=(clusters.spectra.teff,clusters.spectra.logg,clusters.spectra.abun['Fe']),crossterms=True)
 
-This function has updated the ``clusters.spectra.specs`` object and will save the new dataset.
+This function updates the ``clusters.spectra.specs`` object and will save the new dataset.
 
 
 Projecting spectra
@@ -160,6 +177,7 @@ We may wish to reduce the dimensionality of our spectra by projecting them along
 ::
 		clusters.spectra.project(fname='<path to axis vectors>')
 
+This function updates the ``clusters.spectra.specs`` object and will save the new dataset.
 
 SCALING UP
 ^^^^^^^^^^
