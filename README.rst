@@ -58,8 +58,8 @@ In general the workflow follows a few steps:
 Making synthetic cluster data
 +++++++++++++++++++++++++++++
 
-Start by importing the repository's makecluster class object. You will also need to choose two generation functions: one to find the cluster centers and another to find members of a cluster. For this example, we'll use a normal distribution for both finding both cluster centers and members.:
-
+Start by importing the repository's makecluster class object. You will also need to choose two generation functions: one to find the cluster centers and another to find members of a cluster. For this example, we'll use a normal distribution for both finding both cluster centers and members.
+::
 		import numpy as np
 		from tagspace.clusters.makecluster import makecluster, normalgeneration
 
