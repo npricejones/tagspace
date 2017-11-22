@@ -146,7 +146,6 @@ Alternatively, we can create a spectrum for each cluster center and vary it acco
 
 
 Fitting spectra
----------------
 
 Once spectra have been created, their use in chemical tagging can be improved by performing fits to remove differences between spectra due to differing photospheric parameters. To do this with ``tagspace``, use the function associated with the ``spectra`` object. If we assume we have created the ``clusters`` object from the previous section we can perform a fit in the following way. Let us assume we are interested in doing a second order polynomial fit in effective temperature, surface gravity and iron abundance with all cross terms included.
 
@@ -157,7 +156,6 @@ This function has updated the ``clusters.spectra.specs`` object and will save th
 
 
 Projecting spectra
-------------------
 
 We may wish to reduce the dimensionality of our spectra by projecting them along dimensions we think are important. We can supply a path to vectors describing these dimensions or provide them as an array. Either way we use ``project`` to do this in the following way.
 
@@ -202,7 +200,6 @@ External data
 +++++++++++++
 
 Data with known cluster assignments
------------------------------------
 
 Data not created with ``tagspace``  but with known cluster assignments can be read in much the same way as previously created ``tagspace`` data, by using the ``fname`` kwarg of ``makeclusters`` to specify a path. Data should be in the form of a ``tagspace``-like .fits file (described in :ref:`outputdata`). The minimum requirements are a list of lists of data and a list of lists of cluster assignments with. The convenience function ``convert_to_TSfits`` in ``tagspace.data`` can easily convert the array (either from the current session or from file) into an appropriate fits file.
 
@@ -215,7 +212,6 @@ Data not created with ``tagspace``  but with known cluster assignments can be re
 Here ``<datatype>`` refers to any of ``'abundances'``, ``'spectra'``, ``'projspectra'``, or ``'fitspectra'``
 
 Data with unknown cluster assignments
--------------------------------------
 
 Without known cluster assignments, we give our data directly to ``tag``,
 ::
