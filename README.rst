@@ -33,13 +33,13 @@ ENVIRONMENT VARIABLES AND FILE STRUCTURES
 ENVIRONMENT VARIABLES
 ^^^^^^^^^^^^^^^^^^^^^
 
-This package will save the synthetic chemical space it creates (unless explicitly instructed otherwise during ``makeclusters`` object creation with ``save=False``). Files will be saved in the directory set to the environment variable **CHEMICAL_SPACE_DATA**.
+This package will save the synthetic chemical space it creates (unless explicitly instructed otherwise during ``makeclusters`` object creation with ``save=False``). Files will be saved in the directory set to the environment variable **TAGSPACE_DATA**.
 
 FILE STRUCTURES
 ^^^^^^^^^^^^^^^
 Data created with the ``tagspace.clusters.makeclusters`` class for generating synthetic chemical spaces is saved in appropriately named directories, with the following structure
 :: 
-		$CHEMICAL_SPACE_DATA/<cluster center generation function>/<cluster member generation function>/
+		$TAGSPACE_DATA/<cluster center generation function>/<cluster member generation function>/
 
 Files are timestamped to avoid accidental overwriting.
 
