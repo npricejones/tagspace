@@ -104,7 +104,7 @@ Our next step is to call our cluster finding algorithm and apply it to our data.
 
 Our ``tagclusters`` now has the properties of ``clusters`` as well as an array of zeros in ``tagclusters.labels_pred``. This is where we will store the indices that divide our stars into clusters according to the cluster finding algorithm we choose. We now run kmeans, which requires the number of clusters to find as input. We'll choose it to be 20, the true number of clusters.
 ::
-		tagclusters.kmeans(tagclusters.abundances,n_clusters=20)
+		tagclusters.kmeans(datatype='abundances',n_clusters=20)
 
 To see all of kmeans possible kwargs, run ``help(tagclusters.kmeans())``.
 
