@@ -38,7 +38,7 @@ This package will save the synthetic chemical space it creates (unless explicitl
 FILE STRUCTURES
 ^^^^^^^^^^^^^^^
 Data created with the ``tagspace.clusters.makeclusters`` class for generating synthetic chemical spaces is saved in appropriately named directories, with the following structure
-:: code-block:: bash
+:: 
 		$CHEMICAL_SPACE_DATA/<cluster center generation function>/<cluster member generation function>/
 
 Files are timestamped to avoid accidental overwriting.
