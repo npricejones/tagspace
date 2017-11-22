@@ -14,15 +14,15 @@ INSTALLATION
 
 Navigate into the repository to install with:
 
-`python setup.py install`
+```python setup.py install```
 
 with possible option for local installation only:
 
-`python setup.py install --prefix=<some local directory>`
+```python setup.py install --prefix=<some local directory>```
 
-This repository requires the following packages: [numpy](http://www.numpy.org/), [matplotlib](http://matplotlib.org/), [scipy](https://www.scipy.org/), [sklearn](http://scikit-learn.org/stable/), [astropy](http://www.astropy.org/), [galpy](https://github.com/jobovy/galpy), [apogee](https://github.com/jobovy/apogee), and [isodist](https://github.com/jobovy/isodist))
+This repository requires the following packages: `numpy <http://www.numpy.org/>`__, `matplotlib <http://matplotlib.org/>`__, `scipy <https://www.scipy.org/>`__, `sklearn <http://scikit-learn.org/stable/>`, `astropy <http://www.astropy.org/>`__, `galpy <https://github.com/jobovy/galpy>`__, `apogee <https://github.com/jobovy/apogee>`__, and `isodist <https://github.com/jobovy/isodist>`__.
 
-If you wish to try the example notebooks, you'll also need [jupyter](http://jupyter.org)
+If you wish to try the example notebooks, you'll also need `jupyter <http://jupyter.org>`__
 
 Please continue to the section below for instructions on how to set relevant environment variables
 
@@ -38,11 +38,11 @@ This package is intended to test the limits 'chemical tagging', the process of i
 
 CHEMICAL TAGGING
 ^^^^^^^^^^^^^^^^
-Chemical tagging has a great deal of potential as a tool to understand the history of our Milky Way Galaxy. In its most general applications, it can be used to divide our Galaxy into broad populations that can be associated with features like the thin and thick disks or the halo (e.g. `Hawkins et. al. 2015 <https://arxiv.org/abs/1507.03604>`__), or to constrian the chemical evolution of our galaxy (e.g. `Jofre et. al. 2017 <https://arxiv.org/abs/1611.02575>`). The technique has also been used to identify new members of a known chemical population (e.g. `Martell et. al. 2016 <https://arxiv.org/abs/1605.05792>`) or identify unusual new subpopulations (e.g. `Schiavon et. al. 2017 <https://arxiv.org/abs/1606.05651>`) With sufficient precision, chemical tagging may also be able to identify 'birth clusters' of stars that were born in the same gas cloud, even if their dynamical history has erased all evidence of their shared past. However, this requires a blind approach to chemical tagging (e.g. `Mitschang et. al. 2014 <https://arxiv.org/abs/1312.1759>` `Hogg et. al. 2016 <https://arxiv.org/abs/1601.05413>`, ), and may be limited by not only observational precision but by the intrinsic chemical homogeneity and uniqueness of the birth clusters (see e.g. `Blanco-Cuaresma et. al. 2015 <https://arxiv.org/abs/1503.02082>` and `Bovy 2016 <https://arxiv.org/abs/1510.06745>` for studies of instrinic birth cluster properties where open clusters are used as birth cluster proxies).
+Chemical tagging has a great deal of potential as a tool to understand the history of our Milky Way Galaxy. In its most general applications, it can be used to divide our Galaxy into broad populations that can be associated with features like the thin and thick disks or the halo (e.g. `Hawkins et. al. 2015 <https://arxiv.org/abs/1507.03604>`__), or to constrian the chemical evolution of our galaxy (e.g. `Jofre et. al. 2017 <https://arxiv.org/abs/1611.02575>`__). The technique has also been used to identify new members of a known chemical population (e.g. `Martell et. al. 2016 <https://arxiv.org/abs/1605.05792>`__) or identify unusual new subpopulations (e.g. `Schiavon et. al. 2017 <https://arxiv.org/abs/1606.05651>`__) With sufficient precision, chemical tagging may also be able to identify 'birth clusters' of stars that were born in the same gas cloud, even if their dynamical history has erased all evidence of their shared past. However, this requires a blind approach to chemical tagging (e.g. `Mitschang et. al. 2014 <https://arxiv.org/abs/1312.1759>`__, `Hogg et. al. 2016 <https://arxiv.org/abs/1601.05413>`__), and may be limited by not only observational precision but by the intrinsic chemical homogeneity and uniqueness of the birth clusters (see e.g. `Blanco-Cuaresma et. al. 2015 <https://arxiv.org/abs/1503.02082>`__ and `Bovy 2016 <https://arxiv.org/abs/1510.06745>`__ for studies of instrinic birth cluster properties where open clusters are used as birth cluster proxies).
 
 APPROACH
 ^^^^^^^^
-Motivated by the studies listed above, I am developing this pacakge to test the efficacy of blind chemical tagging on various chemical spaces. I am primarily interested in identifying the conditions under which the groups of stars identified by a cluster-finding routine may be associated with stellar birth clusters. To that end, I am creating a flexible approach to cluster formation, allowing user specified functions to define how cluster members are chosen in chemical space. The code is built to create many instances of a particular chemical space and identify their clusters simultaneously. Success is measured by end result homogeneity (`scikit-learn implementation <http://scikit-learn.org/stable/modules/clustering.html#homogeneity-completeness-and-v-measure>`), which describes the level to which each of the algorithimically identified clusters contains only members of a single user-created cluster.
+Motivated by the studies listed above, I am developing this pacakge to test the efficacy of blind chemical tagging on various chemical spaces. I am primarily interested in identifying the conditions under which the groups of stars identified by a cluster-finding routine may be associated with stellar birth clusters. To that end, I am creating a flexible approach to cluster formation, allowing user specified functions to define how cluster members are chosen in chemical space. The code is built to create many instances of a particular chemical space and identify their clusters simultaneously. Success is measured by end result homogeneity (`scikit-learn implementation <http://scikit-learn.org/stable/modules/clustering.html#homogeneity-completeness-and-v-measure>`__), which describes the level to which each of the algorithimically identified clusters contains only members of a single user-created cluster.
 
 EXAMPLE USAGE
 =============
