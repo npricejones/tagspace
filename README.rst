@@ -40,7 +40,7 @@ FILE STRUCTURES
 Data created with the ``tagspace.clusters.makeclusters`` class for generating synthetic chemical spaces is saved in appropriately named directories, with the following structure
 
 :: 
-		$CHEMICAL_SPACE_DATA/<cluster center generation function>/<cluster member generation function>/
+		CHEMICAL_SPACE_DATA/<cluster center generation function>/<cluster member generation function>/
 
 Files are timestamped to avoid accidental overwriting.
 
@@ -129,7 +129,6 @@ Spectra
 +++++++
 
 ``tagspace`` supports two ways of generating spectra of stars to be members of a cluster. Assuming we already have a ``makeclusters`` object called ``clusters`` (as we created in the previous subsection), we can follow two possible paths to create member spectra. The first approach begins by generating abundances, then using those to create spectra. Start by identifying abundances.
-
 ::
 		clusters.create_abundances(genfn = normalgeneration, num = 15, means = cluster.centers, stds = 0.05*np.ones(10),atmnum=[6,7,8,11,12,13,14,16,20,26])
 
@@ -140,15 +139,14 @@ It is now necessary to specify other parameters of the stars so we can generate 
 		clusters.create_spectra_abundances()
 
 Alternatively, we can create a spectrum for each cluster center and vary it according to a generation function, in much the same way as we chose members in abundance space:
-
 ::
 		cluster.create_spectra(genfn = normalgeneration, num = 15, means = cluster.centers, stds = 0.01*np.ones(10))
 
 
 Fitting spectra
+"""""""""""""""
 
 Once spectra have been created, their use in chemical tagging can be improved by performing fits to remove differences between spectra due to differing photospheric parameters. To do this with ``tagspace``, use the function associated with the ``spectra`` object. If we assume we have created the ``clusters`` object from the previous section we can perform a fit in the following way. Let us assume we are interested in doing a second order polynomial fit in effective temperature, surface gravity and iron abundance with all cross terms included.
-
 ::
 		clusters.spectra.fit(fitfn=polynomial,degree=2,variables=(clusters.spectra.teff,clusters.spectra.logg,clusters.spectra.abun['Fe']),crossterms=True)
 
@@ -156,9 +154,9 @@ This function has updated the ``clusters.spectra.specs`` object and will save th
 
 
 Projecting spectra
+""""""""""""""""""
 
 We may wish to reduce the dimensionality of our spectra by projecting them along dimensions we think are important. We can supply a path to vectors describing these dimensions or provide them as an array. Either way we use ``project`` to do this in the following way.
-
 ::
 		clusters.spectra.project(fname='<path to axis vectors>')
 
@@ -188,7 +186,6 @@ If we would like to work with previously created data in a new session, we will 
 The ``fname`` kwarg also accepts a list or array of paths as input. If ``makeclusters``'s ``separate`` kwarg is set to ``False``, the stellar data are checked for shape and combined ,and initial clusters are appropriately reindexed.
 
 Alternatively, if we wanted to use all data that was created with a particular generation function, our process takes an additional step. We will also need to specify what sort of stellar data we are looking for (either ``abundances``, ``spectra``, ``projspectra``, ``fitspectra`` or some list combining two or more of the proceeding), as well as the function used to generate the members for that data. Let's assume we are looking for all ``spectra`` and ``fitspectra`` data created with ``normalgeneration``. 
-
 ::
 		from tagspace.clusters.makeclusters import makeclusters
 		clusters = makeclusters(readdata=True,genfn=normalgeneration,separate=True)
@@ -200,9 +197,9 @@ External data
 +++++++++++++
 
 Data with known cluster assignments
+"""""""""""""""""""""""""""""""""""
 
-Data not created with ``tagspace``  but with known cluster assignments can be read in much the same way as previously created ``tagspace`` data, by using the ``fname`` kwarg of ``makeclusters`` to specify a path. Data should be in the form of a ``tagspace``-like .fits file (described in :ref:`outputdata`). The minimum requirements are a list of lists of data and a list of lists of cluster assignments with. The convenience function ``convert_to_TSfits`` in ``tagspace.data`` can easily convert the array (either from the current session or from file) into an appropriate fits file.
-
+Data not created with ``tagspace``  but with known cluster assignments can be read in much the same way as previously created ``tagspace`` data, by using the ``fname`` kwarg of ``makeclusters`` to specify a path. Data should be in the form of a ``tagspace``-like .fits file (described in the Output Data subsection). The minimum requirements are a list of lists of data and a list of lists of cluster assignments with. The convenience function ``convert_to_TSfits`` in ``tagspace.data`` can easily convert the array (either from the current session or from file) into an appropriate fits file.
 ::
 		from tagspace.data import convert_to_TSfits
 		from tagspace.clusters.makeclusters import makeclusters
@@ -212,6 +209,7 @@ Data not created with ``tagspace``  but with known cluster assignments can be re
 Here ``<datatype>`` refers to any of ``'abundances'``, ``'spectra'``, ``'projspectra'``, or ``'fitspectra'``
 
 Data with unknown cluster assignments
+"""""""""""""""""""""""""""""""""""""
 
 Without known cluster assignments, we give our data directly to ``tag``,
 ::
