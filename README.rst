@@ -58,11 +58,11 @@ In general the workflow follows a few steps:
 Making synthetic cluster data
 +++++++++++++++++++++++++++++
 
-Start by importing the repository's makecluster class object. You will also need to choose two generation functions: one to find the cluster centers and another to find members of a cluster. For this example, we'll use a normal distribution for both finding both cluster centers and members.
-``
+Start by importing the repository's makecluster class object. You will also need to choose two generation functions: one to find the cluster centers and another to find members of a cluster. For this example, we'll use a normal distribution for both finding both cluster centers and members.:
+
 		import numpy as np
 		from tagspace.clusters.makecluster import makecluster, normalgeneration
-``
+
 We'll use ``normalgeneration`` to find our cluster centers. This function takes three arguments: the number of clusters to identify, the mean of the normal distribution (i.e. the center of chemical space) and the standard deviation of the normal distribution. The latter two arguments may have dimensionality of your choosing. In this case we'll assume we're working with 10 chemical elements and want to input 20 clusters. We give the function and its kwargs to ``makeclusters``
 
 		clusters = makeclusters(genfn=normalgeneration,num = 20, means = np.zeros(10), stds = 0.5*np.ones(10))
