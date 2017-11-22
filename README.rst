@@ -64,13 +64,13 @@ Start by importing the repository's makecluster class object. You will also need
 		from tagspace.clusters.makecluster import makecluster, normalgeneration
 
 We'll use ``normalgeneration`` to find our cluster centers. This function takes three arguments: the number of clusters to identify, the mean of the normal distribution (i.e. the center of chemical space) and the standard deviation of the normal distribution. The latter two arguments may have dimensionality of your choosing. In this case we'll assume we're working with 10 chemical elements and want to input 20 clusters. We give the function and its kwargs to ``makeclusters``
-
+::
 		clusters = makeclusters(genfn=normalgeneration,num = 20, means = np.zeros(10), stds = 0.5*np.ones(10))
 
 We have created our cluster centers. ``makeclusters`` has also automatically generated a directory associated with this data set, as well as a root string for saving individual cluster instances. We can overwrite these by passing the ``basepath`` and ``basename`` kwargs to change the directory and root name respectively.
 
 We now have access to the function associated with ``makeclusters``, one of which is ``create_abundances``. This function will generate chemical abundances for members of the clusters given a function to use to find members and its kwargs. We'll use ``normalgeneration`` again, and give each cluster 15 members.
-
+::
 		clusters.create_abundances(genfn = normalgeneration, num = 15, means = cluster.centers, stds = 0.05*np.ones(10))
 
 Since we're using ``normalgeneration`` and have given the ``means`` kwarg as an array with 20 rows (the number of clusters) and 10 columns (the number of chemical abundances), we will create 15 members for each of the 20 clusters. We could specify a different number of members for each cluster by changing our ``num`` kwarg to be an array with length 20.
@@ -81,12 +81,12 @@ Running cluster finding algorithms
 ++++++++++++++++++++++++++++++++++
 
 Our next step is to call our cluster finding algorithm and apply it to our data. For this simple case, we'll use the wrapper for ``scikit-learn``'s KMeans algorithm. First we create a ``tag`` object, which takes a ``makeclusters`` object.
-
+::
 		from tagspace.clusters.clusterfind import tag
 		tagclusters = tag(clusterdata=clusters)
 
 Our ``tagclusters`` now has the properties of ``clusters`` as well as an array of zeros in ``tagclusters.labels_pred``. This is where we will store the indices that divide our stars into clusters according to the cluster finding algorithm we choose. We now run kmeans, which requires the number of clusters to find as input. We'll choose it to be 20, the true number of clusters.
-
+::
 		tagclusters.kmeans(n_clusters=20)
 
 To see all of kmeans possible kwargs, run ``help(tagclusters.kmeans())``.
@@ -97,7 +97,7 @@ Measuring success
 +++++++++++++++++
 
 Now that we have a prediction for how our data should be divided into clusters, we'd like to measure our level of success. We'll use the wrapper for ``sklearn.metric.homogeneity_score`` to compute this.
-
+::
 		tagclusters.homogeneity()
 
 This function
