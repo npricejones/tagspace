@@ -47,7 +47,7 @@ Files are timestamped to avoid accidental overwriting.
 
 OUTPUT DATA
 ^^^^^^^^^^^
-Synthetic data created with ``tagspace.clusters.makeclusters`` is saved by default into .fits files.
+Synthetic data created with ``tagspace.clusters.makeclusters`` is saved by default into .fits files. In their headers they contain the information about the functions used to create the cluster, including the parameters used for reproducability. The first file extension contains the cluster assignments, the second contains abundance data (if generated), the third contains spectra (if generated) and subsequent extensions contain information about possible changes to the spectra.
 
 PURPOSE
 =======
