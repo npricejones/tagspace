@@ -45,6 +45,7 @@ Data created with the ``tagspace.clusters.makeclusters`` class for generating sy
 Files are timestamped to avoid accidental overwriting.
 
 :: _outputdata
+
 OUTPUT DATA
 ^^^^^^^^^^^
 Synthetic data created with ``tagspace.clusters.makeclusters`` is saved by default into .fits files.
@@ -73,6 +74,7 @@ BASIC WORKFLOW - CLUSTERING SYNTHETIC DATA
 In general the workflow follows a few steps:
 
 ::_syntheticabundances
+
 Making synthetic cluster data
 +++++++++++++++++++++++++++++
 
