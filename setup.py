@@ -14,8 +14,9 @@ setup(name='tagspace',
       dependency_links = ['https://github.com/jobovy/apogee/tarball/master#egg=apogee',
                           'https://github.com/jobovy/galpy/tarball/master#egg=galpy',
                           'https://github.com/jobovy/isodist/tarball/master#egg=isodist'],
-      install_requires=['numpy','scipy','matplotlib','astropy',
-                        'apogee','galpy','isodist','scikit-learn']
+      install_requires=['numpy','scipy','matplotlib','astropy','pandas',
+                        'apogee','galpy','isodist','scikit-learn',
+                        'periodictable']
       )
 
 warnings.warn('''APOGEE installation requires environment variables to be set: SDSS_LOCAL_SAS_MIRROR, RESULTS_VERS, APOGEE_APOKASC_REDUX; see the package documentation for more details.''')

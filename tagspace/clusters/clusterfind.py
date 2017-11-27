@@ -5,23 +5,27 @@ from astropy.io import fits
 from tagspace import tagdir
 from tagspace.data import gettimestr
 from tagspace.data.spectra import spectra
+from tagspace.clusters.makeclusters import makeclusters
 
-class tag(object):
-	def __init__(self,data=None,starinfo=None,maxcores=1,save=True):
-		if isinstance(data,str):
-			if data[0] == '/' or data[0] == '~':
-				hdulist = fits.open(data)
-			else:
-				hdulist = fits.open(tagdir+'/'+data)
-			self.datainfo = hdulist[0].header
-			self.starparams = hdulist[self.datainfo['param_index']].data
-			if 'abundance_index' in self.datainfo.keys():
-				self.abundances = hdulist[self.datainfo['abundance_index']].data
-			if 'spectra_index' in self.datainfo.keys():
-				self.spectra = spectra()
-				self.spectra.specs = hdulist[self.datainfo['spectra_index']].data
-		self.maxcores = maxcores
-		self.save = save
+class tag(makeclusters):
+	"""
+	Using existing data, find clusters using a user-specified cluster finding algorithm
+	structured after the template of scikit-learn (e.g. a class with a fit_predict 
+	function)
+
+	"""
+	def __init__(self,centergenfn=normalgeneration,
+				 starinfo=None,maxcores=1,datatype='abundances',
+				 instances=1,save=True,readdata=False,fname=None,
+				 **kwargs):
+		"""
+		Accepts a set of stellar information, including temperatures and surface gravities
+		as well as spectra or chemical abundances, in addition to a list of assignment indices
+		that label each star with the number of the cluster to which it belongs.
+		"""
+		makeclusters.__init__(genfn=normalgeneration,instances=instances,
+							  save=save,maxcores=maxcores,readdata=readdata
+							  fname=fname,**kwargs)
 		return None
 
 	def cluster_wrapper(self,i):
@@ -45,7 +49,7 @@ class tag(object):
 		if self.save:
 			self.savecluster()
 
-	def savecluster(self):
+	def savetag(self):
 		directory = '{0}/{1}/'.format(self.directory,self.clusterfn.__name__)
 		if not os.path.isdir(directory):
 			os.system('mkdir -p {0}'.format(directory))
