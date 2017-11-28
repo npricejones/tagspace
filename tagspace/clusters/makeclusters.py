@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
-import periodictable as pt
-from tagspace import tagdir
+from tagspace import tagdir,ptnumdict,ptsymdict
 from tagspace.data.spectra import spectra
 
 class makeclusters(object):
@@ -11,30 +10,36 @@ class makeclusters(object):
 				 **kwargs):
 		if readdata:
 			if filename[0] == '/' or filename[0] == '~':
-				hdulist = pd.read_hdf(filename)
+				self.clusterdata = pd.read_hdf(filename)
 			else:
-				hdulist = pd.read_hdf(tagdir+'/'+filename)
+				self.clusterdata = pd.read_hdf(tagdir+'/'+filename)
 		elif not readdata:
 			self.instances = instances
 			self.numcluster = numcluster
 			if isinstance(self.numcluster,(int,float)):
 				self.numcluster = np.array([self.numcluster]*self.instances)
 			self.elems = elems
-			self.names = np.zeros(self.elems.shape,dtype='S2')
+			self.elemnames = np.zeros(self.elems.shape,dtype='S2')
 			for e in range(len(elems)):
 				try:
-					atmnum = int(e)
+					self.elems[e] = int(elems[e])
+					self.elemnames[e] = ptsymdict[elems[e]]
 				except ValueError:
-					self.name[e] = e
-					self.elems[e] = pt.elements[]
+					self.elemnames[e] = elems[e]
+					self.elems[e] = ptnumdict[elems[e]]
 			self.numelem = len(elems)
+			self.clusterdata = pd.DataFrame()
 			for i in range(self.instances):
+				indx = [i]*self.numbercluster[i]
+				dfdict = {'labels_true':pd.Series(np.arange(self.numcluster[i],dtype=int),
+												  index=indx)}
 				clustercenters = self.centergenfn(numcluster=self.numcluster[i],
-														  numelem=self.numelem,**kwargs)
-				clusterdata = pd.DataFrame(self.clustercenters[i],columns = )
+												  numelem=self.numelem,**kwargs)
+				for abun in range(clustercenters.shape[1]):
+					dfdict[self.elemnames[abun]] = pd.Series(clustercenters[:,abun],index=indx)
+				tempdf = pd.DataFrame(dfdict)
+				self.clusterdata.append(tempdf)
 		return None
-
-	def _element_list(self):
 
 
 	def create_abundances(self,genfn=normalgeneration, **kwargs):
