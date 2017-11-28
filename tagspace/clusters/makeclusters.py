@@ -6,14 +6,14 @@ from tagspace import tagdir,ptnumdict,ptsymdict
 
 class makeclusters(object):
 	def __init__(self,genfn=normalgeneration,instances=1,readdata=False,
-				 fname=None,numcluster=20,numelem=10,
+				 filename=None,numcluster=20,numelem=10,
 				 elems=np.array([6,7,8,11,12,13,14,16,19,20]),
 				 **kwargs):
 		if readdata:
 			if filename[0] == '/' or filename[0] == '~':
-				self.clusterdata = pd.read_hdf(filename)
+				self.centerdata = pd.read_hdf(filename)
 			else:
-				self.clusterdata = pd.read_hdf(tagdir+'/'+filename)
+				self.centerdata = pd.read_hdf(tagdir+'/'+filename)
 		elif not readdata:
 			self.name=''
 			self.centergenfn = genfn
@@ -41,34 +41,41 @@ class makeclusters(object):
 				abundf['labels_true'] = pd.Series(np.arange(self.numcluster,dtype=int),index=abundf.index)
 				self.centerdata = self.centerdata.append(abundf)
 				entry += self.numcluster
-		return None
+		return self.centerdata
 
 
-	def create_abundances(self,genfn=normalgeneration,nummembers=20,**kwargs):
+	def create_abundances(self,genfn=normalgeneration,nummembers=20,readata=False,filename=None,**kwargs):
 		self.datatype = 'abundances'
-		self.membergenfn = genfn
-		self.nummembers = nummembers
-		self.clusterdata = pd.DataFrame()
-		if isinstance(self.nummembers,(int,float)):
-			self.nummembers = np.array([self.nummembers]*self.numcluster)
-		entry = 0
-		for i in range(self.instances):
-			centers = self.centerdata[self.centerdata['instances']==i]
-			for c in range(len(centers)):
-				# parallel spot
-				indx = [i]*self.nummembers[c]
-				label = [c]*self.nummembers[c]
-				# passing means implies normal
-				center = np.array(centers[self.centernames][centers['labels_true']==c])[0]
-				clustermembers = self.membergenfn(num=self.nummembers[c],
-												  numelem=self.numelem,
-												  centers=center, **kwargs)
-				abundf = pd.DataFrame(clustermembers,columns=self.elemnames,index=np.arange(entry,entry+self.nummembers[c],dtype=int))
-				abundf['instances'] = pd.Series(indx,index=abundf.index)
-				abundf['labels_true'] = pd.Series(label,index=abundf.index)
-				self.clusterdata = self.clusterdata.append(abundf)
-				entry += self.nummembers[c]
-		return None
+		if readdata:
+			if filename[0] == '/' or filename[0] == '~':
+				self.centerdata = pd.read_hdf(filename)
+			else:
+				self.centerdata = pd.read_hdf(tagdir+'/'+filename)
+		elif not readdata:
+			self.membergenfn = genfn
+			self.nummembers = nummembers
+			self.clusterdata = pd.DataFrame()
+			if isinstance(self.nummembers,(int,float)):
+				self.nummembers = np.array([self.nummembers]*self.numcluster)
+			entry = 0
+			for i in range(self.instances):
+				centers = self.centerdata[self.centerdata['instances']==i]
+				for c in range(len(centers)):
+					# parallel spot
+					indx = [i]*self.nummembers[c]
+					label = [c]*self.nummembers[c]
+					center = np.array(centers[self.centernames][centers['labels_true']==c])[0]
+					clustermembers = self.membergenfn(num=self.nummembers[c],
+													  numelem=self.numelem,
+													  centers=center, **kwargs)
+					memberinfo = np.hstack((clustermembers,np.tile(center,[self.nummembers[c],1])))
+					headers = list(self.elemnames)+self.centernames
+					abundf = pd.DataFrame(memberinfo,columns=headers,index=np.arange(entry,entry+self.nummembers[c],dtype=int))
+					abundf['instances'] = pd.Series(indx,index=abundf.index)
+					abundf['labels_true'] = pd.Series(label,index=abundf.index)
+					self.clusterdata = self.clusterdata.append(abundf)
+					entry += self.nummembers[c]
+		return self.clusterdata
 
 	def savecluster(self,name=None):
 		directory = '{0}/{1}/{2}/{3}'.format(self.directory,
@@ -78,4 +85,4 @@ class makeclusters(object):
 		if not os.path.isdir(directory):
 			os.system('mkdir -p {0}'.format(directory))
 		name = '{0}{1}'.format(gettimestr(),self.name)
-		self.instancedata.to_hdf(directory+'/'+name)
+		self.clusterdata.to_hdf(directory+'/'+name)
