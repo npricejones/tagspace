@@ -24,7 +24,7 @@ class tag(makeclusters):
 		that label each star with the number of the cluster to which it belongs.
 		"""
 		makeclusters.__init__(genfn=normalgeneration,instances=instances,
-							  save=save,maxcores=maxcores,readdata=readdata
+							  save=save,maxcores=maxcores,readdata=readdata,
 							  fname=fname,**kwargs)
 		return None
 
