@@ -1,21 +1,30 @@
+import h5py
+import copy
 import numpy as np
 import pandas as pd
+from tagspace import tagdir
+from tagspace.data import gettimestr
+from tagspace.wrappers import getwrapperattrs
 from tagspace.wrappers.genfns import normalgeneration
 from tagspace import tagdir,ptnumdict,ptsymdict
 #from tagspace.data.spectra import spectra
 
 class makeclusters(object):
+	"""
+	"""
 	def __init__(self,genfn=normalgeneration,instances=1,readdata=False,
 				 filename=None,numcluster=20,numelem=10,
 				 elems=np.array([6,7,8,11,12,13,14,16,19,20]),
 				 **kwargs):
+		"""
+		"""
 		if readdata:
 			if filename[0] == '/' or filename[0] == '~':
-				self.centerdata = pd.read_hdf(filename)
+				self.datafile = h5py.File(filename,'r')
 			else:
-				self.centerdata = pd.read_hdf(tagdir+'/'+filename)
+				self.datafile = h5py.File(tagdir+'/'+filename,'r')
 		elif not readdata:
-			self.name=''
+			self.datafile = h5py.File(tagdir+'/synthetic_clusters.hdf5','w')
 			self.centergenfn = genfn
 			self.instances = instances
 			self.numcluster = numcluster
@@ -29,60 +38,63 @@ class makeclusters(object):
 					self.elemnames[e] = elems[e]
 					self.elems[e] = ptnumdict[elems[e]]
 			self.numelem = len(elems)
-			self.centerdata = pd.DataFrame()
-			self.centernames = ['center-{0}'.format(i) for i in self.elemnames]
-			entry = 0
+			self.centerpaths = []
+			self.centerdata= np.zeros((self.instances,self.numcluster,self.numelem))
+			kwargdict = copy.deepcopy(kwargs)
 			for i in range(self.instances):
-				indx = [i]*self.numcluster
+				currenttime = gettimestr()
+				instance = self.datafile.create_group(currenttime+'/'+self.centergenfn.__name__)
+				self.centerpaths.append(instance)
 				clustercenters = self.centergenfn(num=self.numcluster,
 												  numelem=self.numelem,**kwargs)
-				abundf = pd.DataFrame(clustercenters,columns=self.centernames,index=np.arange(entry,entry+self.numcluster,dtype=int))
-				abundf['instances'] = pd.Series(indx,index=abundf.index)
-				abundf['labels_true'] = pd.Series(np.arange(self.numcluster,dtype=int),index=abundf.index)
-				self.centerdata = self.centerdata.append(abundf)
-				entry += self.numcluster
-		return self.centerdata
+				self.centerdata[i] = clustercenters
+				kwargdict.update({'num':self.numcluster,'numelem':self.numelem})
+				getwrapperattrs(instance,self.centergenfn,kwargdict=kwargdict)
+				instance.attrs['centers'] = clustercenters
+				instance.attrs['elemnames'] = self.elemnames
+				instance.attrs['elemnums'] = self.elems
+		return None
 
 
-	def create_abundances(self,genfn=normalgeneration,nummembers=20,readata=False,filename=None,**kwargs):
+	def create_abundances(self,genfn=normalgeneration,nummembers=20,readdata=False,path=None,**kwargs):
+		"""
+		"""
 		self.datatype = 'abundances'
 		if readdata:
-			if filename[0] == '/' or filename[0] == '~':
-				self.centerdata = pd.read_hdf(filename)
-			else:
-				self.centerdata = pd.read_hdf(tagdir+'/'+filename)
+			pass
+			# call function from __init__ to get info
+			# path could specify some date info
 		elif not readdata:
 			self.membergenfn = genfn
 			self.nummembers = nummembers
-			self.clusterdata = pd.DataFrame()
+			self.members = np.zeros((self.instances,np.sum(self.nummembers),self.numelem))
+			self.labels_true = -np.ones(self.instances,np.sum(self.nummembers))
+			kwargdict = copy.deepcopy(kwargs)
 			if isinstance(self.nummembers,(int,float)):
 				self.nummembers = np.array([self.nummembers]*self.numcluster)
-			entry = 0
 			for i in range(self.instances):
-				centers = self.centerdata[self.centerdata['instances']==i]
+				centers = self.centerdata[i]
+				instance = self.centerpaths[i].create_group(self.membergenfn.__name__)
+				members = np.zeros((np.sum(self.nummembers),self.numelem))
+				labels_true = -np.ones(np.sum(self.nummembers))
+				starpos = 0
 				for c in range(len(centers)):
 					# parallel spot
-					indx = [i]*self.nummembers[c]
 					label = [c]*self.nummembers[c]
-					center = np.array(centers[self.centernames][centers['labels_true']==c])[0]
 					clustermembers = self.membergenfn(num=self.nummembers[c],
 													  numelem=self.numelem,
-													  centers=center, **kwargs)
-					memberinfo = np.hstack((clustermembers,np.tile(center,[self.nummembers[c],1])))
-					headers = list(self.elemnames)+self.centernames
-					abundf = pd.DataFrame(memberinfo,columns=headers,index=np.arange(entry,entry+self.nummembers[c],dtype=int))
-					abundf['instances'] = pd.Series(indx,index=abundf.index)
-					abundf['labels_true'] = pd.Series(label,index=abundf.index)
-					self.clusterdata = self.clusterdata.append(abundf)
-					entry += self.nummembers[c]
-		return self.clusterdata
-
-	def savecluster(self,name=None):
-		directory = '{0}/{1}/{2}/{3}'.format(self.directory,
-											 self.centergenfn.__name__,
-											 self.membergenfn.__name__,
-											 self.datatype)
-		if not os.path.isdir(directory):
-			os.system('mkdir -p {0}'.format(directory))
-		name = '{0}{1}'.format(gettimestr(),self.name)
-		self.clusterdata.to_hdf(directory+'/'+name)
+													  centers=centers, **kwargs)
+					members[starpos:starpos+self.nummembers[c]] = clustermembers
+					labels_true[starpos:starpos+self.nummembers[c]] = label
+					starpos+= self.nummembers[c]
+				self.members[i] = members
+				self.labels_true[i] = labels_true
+				instance['clustermembers'] = members
+				memberinfo = instance['clustermembers']
+				memberinfo.attrs['labels_true'] = labels_true
+				memberinfo.attrs['datatype'] = self.datatype
+				memberinfo.attrs['elemnames'] = self.elemnames
+				memberinfo.attrs['elemnums'] = self.elems
+				kwargdict.update({'num':self.nummembers,'numelem':self.numelem})
+				getwrapperattrs(instance,self.membergenfn,kwargdict=kwargdict)
+		return None
