@@ -13,7 +13,7 @@ class makeclusters(object):
 	"""
 	"""
 	def __init__(self,genfn=normalgeneration,instances=1,readdata=False,
-				 filename=None,numcluster=20,numelem=10,
+				 filename=None,numcluster=20,numelem=10,maxcores=1,
 				 elems=np.array([6,7,8,11,12,13,14,16,19,20]),
 				 **kwargs):
 		"""

@@ -14,18 +14,19 @@ class tag(makeclusters):
 	function)
 
 	"""
-	def __init__(self,centergenfn=normalgeneration,
-				 starinfo=None,maxcores=1,datatype='abundances',
-				 instances=1,save=True,readdata=False,fname=None,
+	def __init__(self,genfn=normalgeneration,instances=1,readdata=False,
+				 filename=None,numcluster=20,numelem=10,maxcores=1,
+				 elems=np.array([6,7,8,11,12,13,14,16,19,20]),
 				 **kwargs):
 		"""
 		Accepts a set of stellar information, including temperatures and surface gravities
 		as well as spectra or chemical abundances, in addition to a list of assignment indices
 		that label each star with the number of the cluster to which it belongs.
 		"""
-		makeclusters.__init__(genfn=normalgeneration,instances=instances,
-							  save=save,maxcores=maxcores,readdata=readdata,
-							  fname=fname,**kwargs)
+		makeclusters.__init__(genfn=normalgeneration,instances=1,readdata=False,
+				 			  filename=None,numcluster=20,numelem=10,maxcores=1,
+				 			  elems=np.array([6,7,8,11,12,13,14,16,19,20]),
+				 			  **kwargs)
 		return None
 
 	def cluster_wrapper(self,i):
