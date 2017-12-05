@@ -45,7 +45,7 @@ class makeclusters(object):
 			for i in range(self.instances):
 				currenttime = gettimestr()
 				instance = self.datafile.create_group(currenttime+'/'+self.centergenfn.__name__)
-				self.centerpaths.append(instance)
+				self.centerpaths.append(currenttime+'/'+self.centergenfn.__name__)
 				clustercenters = self.centergenfn(num=self.numcluster,
 												  numelem=self.numelem,**kwargs)
 				self.centerdata[i] = clustercenters
@@ -54,6 +54,7 @@ class makeclusters(object):
 				instance.attrs['centers'] = clustercenters
 				instance.attrs['elemnames'] = self.elemnames
 				instance.attrs['elemnums'] = self.elems
+			self.datafile.close()
 		return None
 
 
@@ -66,6 +67,7 @@ class makeclusters(object):
 			# call function from __init__ to get info
 			# path could specify some date info
 		elif not readdata:
+			self.datafile = h5py.File(tagdir+'/synthetic_clusters.hdf5','w')
 			self.membergenfn = genfn
 			self.nummembers = nummembers
 			if isinstance(self.nummembers,(int,float)):
@@ -75,7 +77,7 @@ class makeclusters(object):
 			kwargdict = copy.deepcopy(kwargs)
 			for i in range(self.instances):
 				centers = self.centerdata[i]
-				instance = self.centerpaths[i].create_group(self.membergenfn.__name__)
+				instance = self.datafile.create_group(self.centerpaths[i]+'/'+self.membergenfn.__name__)
 				self.members = np.zeros((np.sum(self.nummembers),self.numelem))
 				labels_true = -np.ones(np.sum(self.nummembers))
 				starpos = 0
@@ -98,4 +100,5 @@ class makeclusters(object):
 				memberinfo.attrs['elemnums'] = self.elems
 				kwargdict.update({'num':self.nummembers,'numelem':self.numelem})
 				getwrapperattrs(instance,self.membergenfn,kwargdict=kwargdict)
+			self.datafile.close()
 		return None
