@@ -47,8 +47,9 @@ class tag(makeclusters):
 		self.clusterfn = clusterfn
 		self.repeats = repeats
 		self.kwargs = kwargs
-		self.labels_pred = ml.parallel_map(self.cluster_wrapper,range(self.instances),
-										   numcores=self.maxcores)
+		self.labels_pred = np.array(ml.parallel_map(self.cluster_wrapper,
+													range(self.instances),
+										  			numcores=self.maxcores))
 
 	def externalval():
 		return None
