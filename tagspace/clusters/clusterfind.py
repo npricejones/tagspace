@@ -38,18 +38,30 @@ class tag(makeclusters):
 			predict = self.clusterfn(**self.kwargs).fit_predict(self.clusterdata[i])
 			repeatpreds[startrack:startrack+numstars] = predict
 			startrack+=numstars
+		self.instance['labels_pred_{0}'.format(self.timestamps[i])] = repeatpreds
+		preds = self.instance['labels_pred_{0}'.format(self.timestamps[i])]
+		preds.attrs['data'] = self.datapath[i]
+		getwrapperattrs(preds,self.clusterfn,kwargdict=kwargs)
 		return repeatpreds
 
-	def cluster(self,clusterdata,clusterfn,repeats=1,**kwargs):
+	def cluster(self,datapath,clusterfn,repeats=1,**kwargs):
 		"""
 		"""
-		self.clusterdata = clusterdata
+		self.datafile = h5py.File(self.filename,'w')
+		self.clusterpath = 'cluster_find/'+clusterfn.__name__
+		if self.clusterpath not in self.datafile:
+			self.instance = self.datafile.create_group(self.clusterpath)
+		elif self.clusterpath in self.datafile:
+			self.instance = self.datafile[self.clusterpath]
+		self.datapath = datapath
+		self.clusterdata = self.datafile[datapath][:]
 		self.clusterfn = clusterfn
 		self.repeats = repeats
 		self.kwargs = kwargs
 		self.labels_pred = np.array(ml.parallel_map(self.cluster_wrapper,
 													range(self.instances),
 										  			numcores=self.maxcores))
+		self.datafile.close()
 
 	def externalval():
 		return None
