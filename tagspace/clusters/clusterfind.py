@@ -1,9 +1,11 @@
 import os
+import h5py
 import numpy as np
 from galpy.util import multi as ml
 from astropy.io import fits
 from tagspace import tagdir
 from tagspace.data import gettimestr
+from tagspace.wrappers.genfns import normalgeneration
 from tagspace.data.spectra import spectra
 from tagspace.clusters.makeclusters import makeclusters
 
@@ -18,41 +20,33 @@ class tag(makeclusters):
 				 filename=None,numcluster=20,numelem=10,maxcores=1,
 				 elems=np.array([6,7,8,11,12,13,14,16,19,20]),
 				 **kwargs):
+		"""		
 		"""
-		Accepts a set of stellar information, including temperatures and surface gravities
-		as well as spectra or chemical abundances, in addition to a list of assignment indices
-		that label each star with the number of the cluster to which it belongs.
-		"""
-		makeclusters.__init__(genfn=normalgeneration,instances=1,readdata=False,
-				 			  filename=None,numcluster=20,numelem=10,maxcores=1,
-				 			  elems=np.array([6,7,8,11,12,13,14,16,19,20]),
-				 			  **kwargs)
+		makeclusters.__init__(self,genfn=normalgeneration,instances=instances,readdata=readdata,
+				 			  filename=filename,numcluster=numcluster,numelem=numelem,maxcores=maxcores,
+				 			  elems=elems,**kwargs)
 		return None
 
 	def cluster_wrapper(self,i):
-		repeatlist = []
+		"""
+		"""
+		numstars = self.clusterdata[i].shape[0]
+		numproperties = self.clusterdata[i].shape[1]
+		repeatpreds = np.zeros((numstars*self.repeats))
+		startrack = 0
 		for r in range(self.repeats):
 			predict = self.clusterfn(**self.kwargs).fit_predict(self.clusterdata[i])
-			repeatlist.append(predict)
-		return repeatlist
+			repeatpreds[startrack:startrack+numstars] = predict
+			startrack+=numstars
+		return repeatpreds
 
-	def cluster(self,datatype='abundances',clusterfn,repeats=1,**kwargs):
-		if isinstance(datatype,str):
-			if datatype == 'abundances'
-				self.clusterdata = self.abundances
-			elif datatype == 'spectra':
-				self.clusterdata = self.spectra.specs
+	def cluster(self,clusterdata,clusterfn,repeats=1,**kwargs):
+		"""
+		"""
+		self.clusterdata = clusterdata
 		self.clusterfn = clusterfn
 		self.repeats = repeats
 		self.kwargs = kwargs
 		self.labels_pred = ml.parallel_map(self.cluster_wrapper,range(self.instances),
 										   numcores=self.maxcores)
-		if self.save:
-			self.savecluster()
 
-	def savetag(self):
-		directory = '{0}/{1}/'.format(self.directory,self.clusterfn.__name__)
-		if not os.path.isdir(directory):
-			os.system('mkdir -p {0}'.format(directory))
-		name = '{0}_{1}repeats_{2}'.format(self.datainfo['name'],self.repeats,gettimestr())
-		np.savez(directory+name, labels_true=np.array(self.labels_true), labels_pred=np.array(self.labels_pred))

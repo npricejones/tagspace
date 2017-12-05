@@ -18,6 +18,7 @@ class makeclusters(object):
 				 **kwargs):
 		"""
 		"""
+		self.maxcores = maxcores
 		if readdata:
 			if filename[0] == '/' or filename[0] == '~':
 				self.datafile = h5py.File(filename,'r')
@@ -67,15 +68,15 @@ class makeclusters(object):
 		elif not readdata:
 			self.membergenfn = genfn
 			self.nummembers = nummembers
-			self.members = np.zeros((self.instances,np.sum(self.nummembers),self.numelem))
-			self.labels_true = -np.ones(self.instances,np.sum(self.nummembers))
-			kwargdict = copy.deepcopy(kwargs)
 			if isinstance(self.nummembers,(int,float)):
 				self.nummembers = np.array([self.nummembers]*self.numcluster)
+			self.abundances = np.zeros((self.instances,np.sum(self.nummembers),self.numelem))
+			self.labels_true = -np.ones((self.instances,np.sum(self.nummembers)))
+			kwargdict = copy.deepcopy(kwargs)
 			for i in range(self.instances):
 				centers = self.centerdata[i]
 				instance = self.centerpaths[i].create_group(self.membergenfn.__name__)
-				members = np.zeros((np.sum(self.nummembers),self.numelem))
+				self.members = np.zeros((np.sum(self.nummembers),self.numelem))
 				labels_true = -np.ones(np.sum(self.nummembers))
 				starpos = 0
 				for c in range(len(centers)):
@@ -84,12 +85,12 @@ class makeclusters(object):
 					clustermembers = self.membergenfn(num=self.nummembers[c],
 													  numelem=self.numelem,
 													  centers=centers, **kwargs)
-					members[starpos:starpos+self.nummembers[c]] = clustermembers
+					self.members[starpos:starpos+self.nummembers[c]] = clustermembers
 					labels_true[starpos:starpos+self.nummembers[c]] = label
 					starpos+= self.nummembers[c]
-				self.members[i] = members
+				self.abundances[i] = self.members
 				self.labels_true[i] = labels_true
-				instance['clustermembers'] = members
+				instance['clustermembers'] = self.members
 				memberinfo = instance['clustermembers']
 				memberinfo.attrs['labels_true'] = labels_true
 				memberinfo.attrs['datatype'] = self.datatype
