@@ -50,3 +50,12 @@ class tag(makeclusters):
 		self.labels_pred = ml.parallel_map(self.cluster_wrapper,range(self.instances),
 										   numcores=self.maxcores)
 
+	def externalval():
+		return None
+
+	def internalval():
+		return None
+
+	def violinstats():
+		return None
+
