@@ -10,3 +10,5 @@ def gettimestr():
 																			   current.second,
 																			   current.microsecond)
 	return timestr
+
+# Function to slice a h5py dataset on element number, element name, pixel number of wavelength
