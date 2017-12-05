@@ -26,7 +26,7 @@ class makeclusters(object):
 				self.filename = tagdir+'/'+filename
 			datafile = h5py.File(self.filename,'r')
 		elif not readdata:
-			self.filename = tagdir+'/synthetic_clusters.hdf5'
+			self.filename = tagdir+'/clustering_data.hdf5'
 			self.datafile = h5py.File(self.filename,'w')
 			self.centergenfn = genfn
 			self.instances = instances
@@ -43,7 +43,11 @@ class makeclusters(object):
 			self.numelem = len(elems)
 			self.timestamps = []
 			self.centerdata= np.zeros((self.instances,self.numcluster,self.numelem))
-			instance = self.datafile.create_group(self.centergenfn.__name__)
+			self.rootpath = 'synthetic_clusters/'+self.centergenfn.__name__
+			if self.rootpath not in self.datafile:
+				instance = self.datafile.create_group(self.rootpath)
+			elif self.rootpath in self.datafile:
+				instance = self.datafile[self.rootpath]
 			kwargdict = copy.deepcopy(kwargs)
 			for i in range(self.instances):
 				currenttime = gettimestr()
@@ -80,7 +84,10 @@ class makeclusters(object):
 			kwargdict = copy.deepcopy(kwargs)
 			for i in range(self.instances):
 				centers = self.centerdata[i]
-				instance = self.datafile.create_group(self.centergenfn.__name__+'/'+self.membergenfn.__name__)
+				if self.rootpath+'/'+self.membergenfn.__name__ not in self.datafile:
+					instance = self.datafile.create_group(self.rootpath+'/'+self.membergenfn.__name__)
+				elif self.rootpath+'/'+self.membergenfn.__name__ in self.datafile:
+					instance = self.datafile[self.rootpath+'/'+self.membergenfn.__name__]
 				self.members = np.zeros((np.sum(self.nummembers),self.numelem))
 				labels_true = -np.ones(np.sum(self.nummembers))
 				starpos = 0
