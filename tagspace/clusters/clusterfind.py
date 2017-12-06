@@ -3,10 +3,12 @@ import h5py
 import numpy as np
 from galpy.util import multi as ml
 from astropy.io import fits
+from sklearn.metrics import homogeneity_score
 from tagspace import tagdir
 from tagspace.data import gettimestr
 from tagspace.wrappers.genfns import normalgeneration
 from tagspace.data.spectra import spectra
+from tagspace.clusters import external_validation
 from tagspace.clusters.makeclusters import makeclusters
 
 class tag(makeclusters):
@@ -63,10 +65,14 @@ class tag(makeclusters):
 										  			numcores=self.maxcores))
 		self.datafile.close()
 
-	def externalval():
+	def extval(self,metric=homogeneity_score):
+		self.extscores = np.zeros((self.instances,self.repeats,self.labels_true.shape[1])) 
+		for i in range(self.instances):
+			for r in range(self.repeats):
+				self.extscores[i][r] = external_validation(self.labels_true[i],self.labels_pred[i][r],metric=metric)
 		return None
 
-	def internalval():
+	def intval():
 		return None
 
 	def violinstats():
