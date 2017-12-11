@@ -57,8 +57,8 @@ class makeclusters(object):
 		# Generate data
 		elif not readdata:
 			# Assign basic class attributes
-			self.filename = tagdir+'/clustering_data.hdf5'
-			self.datafile = h5py.File(self.filename,'w')
+			self.synfilename = tagdir+'synthetic_clusters/'+self.centergenfn.__name__+'/clustering_data.hdf5'
+			self.datafile = h5py.File(self.synfilename,'w')
 			self.centergenfn = genfn
 			self.instances = instances
 			self.numcluster = numcluster
@@ -82,11 +82,6 @@ class makeclusters(object):
 
 			# Cluster center data to be stored in one large array
 			self.centerdata= np.zeros((self.instances,self.numcluster,self.numelem))
-			self.synpath = 'synthetic_clusters/'+self.centergenfn.__name__
-			if self.synpath not in self.datafile:
-				instance = self.datafile.create_group(self.synpath)
-			elif self.synpath in self.datafile:
-				instance = self.datafile[self.synpath]
 			# Update kwarg dictionary with parameters that are class attributes 
 			kwargs.update({'num':self.numcluster,'numelem':self.numelem})
 
@@ -102,8 +97,8 @@ class makeclusters(object):
 
 				# Assign attributes to HDF5 dataset
 				dsetname = 'center_abundances_{0}'.format(currenttime)
-				instance[dsetname] = clustercenters
-				centerinfo = instance[dsetname]
+				self.datafile[dsetname] = clustercenters
+				centerinfo = self.datafile[dsetname]
 				getwrapperattrs(centerinfo,self.centergenfn,kwargdict=kwargs)
 				centerinfo.attrs['elemnames'] = self.elemnames
 				centerinfo.attrs['elemnums'] = self.elems
@@ -134,7 +129,7 @@ class makeclusters(object):
 			# path could specify some date info
 		elif not readdata:
 			# Assign more class attributes
-			self.datafile = h5py.File(self.filename,'w')
+			self.datafile = h5py.File(self.synfilename,'w')
 			self.membergenfn = genfn
 			self.nummembers = nummembers
 
@@ -156,15 +151,18 @@ class makeclusters(object):
 				# Get cluster centers for this instance
 				centers = self.centerdata[i]
 
-				dsetname = self.synpath+'/'+self.membergenfn.__name__
+				# Create group to store data 
+				dsetname = self.membergenfn.__name__
 				if dset name not in self.datafile:
 					instance = self.datafile.create_group(dsetpath)
 				elif dsetpath in self.datafile:
 					instance = self.datafile[dsetpath]
 
-				
+				# Create array to store members and true labels
 				self.members = np.zeros((np.sum(self.nummembers),self.numelem))
 				labels_true = -np.ones(np.sum(self.nummembers))
+				
+				# Create members for each cluster
 				starpos = 0
 				for c in range(len(centers)):
 					# parallel spot
@@ -175,10 +173,15 @@ class makeclusters(object):
 					self.members[starpos:starpos+self.nummembers[c]] = clustermembers
 					labels_true[starpos:starpos+self.nummembers[c]] = label
 					starpos+= self.nummembers[c]
+				
+				# Update class properties
 				self.abundances[i] = self.members
 				self.labels_true[i] = labels_true
+
+				# Create data set in file
 				instance['member_abundances_{0}'.format(self.timestamps[i])] = self.members
 				memberinfo = instance['member_abundances_{0}'.format(self.timestamps[i])]
+				# Assign attributes
 				memberinfo.attrs['labels_true'] = labels_true
 				memberinfo.attrs['elemnames'] = self.elemnames
 				memberinfo.attrs['elemnums'] = self.elems
@@ -186,3 +189,22 @@ class makeclusters(object):
 				getwrapperattrs(memberinfo,self.membergenfn,kwargdict=kwargdict)
 			self.datafile.close()
 		return None
+
+
+	def create_spectra(self,genfn=normalgeneration,nummembers=20,
+						  readdata=False,path=None,**kwargs):
+		"""
+		Given a generation function and its kwargs, create cluster members.
+
+		genfn:		Function used to find cluster member abundances 
+					(defaults to choosing from a normal distribution)
+		nummembers:	Number of stars per cluster; integer or iterable of 
+					integers with length of makeclusters.numclusters
+		readdata:	Boolean that looks for existing data if set True 
+					(redundant with filename******)
+		path:		Some information about where to get files ********
+		**kwargs:	Passed to genfn
+
+		Returns None
+		"""
+		self.datatype = 'spectra'
