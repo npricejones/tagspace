@@ -23,10 +23,11 @@ class makeclusters(object):
 			self.names = np.zeros(self.elems.shape,dtype='S2')
 			for e in range(len(elems)):
 				try:
-					atmnum = int(e)
+					atmnum = int(elems[e])
+					self.names =
 				except ValueError:
-					self.name[e] = e
-					self.elems[e] = pt.elements[]
+					self.name[e] = elems[e]
+					self.elems[e] = pt.elements[elems[e]].number
 			self.numelem = len(elems)
 			for i in range(self.instances):
 				clustercenters = self.centergenfn(numcluster=self.numcluster[i],
