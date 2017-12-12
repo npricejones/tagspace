@@ -1,12 +1,15 @@
 import h5py
 import copy
+import inspect
 import numpy as np
 import pandas as pd
 from tagspace import tagdir
 from tagspace.data import gettimestr
+from tagspace.data.spectra import psmspectra
 from tagspace.wrappers import getwrapperattrs
-from tagspace.wrappers.genfns import normalgeneration
 from tagspace import tagdir,ptnumdict,ptsymdict
+from numpy.lib.recfunctions import append_fields
+from tagspace.wrappers.genfns import normalgeneration,choice2dgeneration,lineargeneration
 #from tagspace.data.spectra import spectra
 
 class makeclusters(object):
@@ -190,21 +193,84 @@ class makeclusters(object):
 			self.datafile.close()
 		return None
 
+	def get_photosphere(self,readdata=False,path=None,nummembers=20,
+					    params=[['TEFF','LOGG'],['VTURB']],
+					    genfns=[choice2dgeneration,lineargeneration],
+						kwargs=[{'num':10,'numprop':2,
+								  'readdata':'{0}/APOGEE/rc_teff_logg.npy'},
+								 {'num':10,'numprop':1,'indeps':'LOGG'}]):
+		if readdata:
+			pass
+		# Make nummembers into an interable
+		if isinstance(self.nummembers,(int)):
+			self.nummembers = np.array([self.nummembers]*self.numcluster)
+		paramlabels =  [x.upper() for sublist in params for x in sublist]
+		# If self.photosphere doesn't exist, initlialize it
+		self.photosphere = getattr(self,'photosphere',
+								   np.zeros(np.sum(self.nummembers),
+								   			dtype=[(paramlabels[0],float)]))
+		for param in range(len(params)):
+			genfn = genfns[param]
+			genresults = genfn(**kwargs[param])
+			for p in range(len(param)):
+				# Check for possiblity that this attribute is being updated
+				try:
+					setattr(self,param[p],genresults[:,p])
+					self.photosphere[param[p]] = genresults[:,p]
+				except ValueError:
+					self.photosphere = append_fields(self.photosphere,
+													 param[p],genresults[:,p])
+		return None
 
-	def create_spectra(self,genfn=normalgeneration,nummembers=20,
-						  readdata=False,path=None,**kwargs):
+
+	def create_spectra(self,readdata=False,path=None,specclass=psmspectra,
+					   specfn='member',**kwargs):
 		"""
 		Given a generation function and its kwargs, create cluster members.
 
-		genfn:		Function used to find cluster member abundances 
+		genfn:		Function used to find cluster member spectra
 					(defaults to choosing from a normal distribution)
 		nummembers:	Number of stars per cluster; integer or iterable of 
 					integers with length of makeclusters.numclusters
 		readdata:	Boolean that looks for existing data if set True 
 					(redundant with filename******)
 		path:		Some information about where to get files ********
-		**kwargs:	Passed to genfn
+		**kwargs:	Passed to specclass.specfn
 
 		Returns None
 		"""
 		self.datatype = 'spectra'
+		if readdata:
+			pass
+		elif not readdata:
+			# split up kwargs for functions
+			genfnposkwargs = inspect.getargspec(genfn)[0]
+			specgenposkwargs = inspect.getargspec(specgen)[0]
+			genfnkwargs = {}
+			specgenkwargs = {}
+			for kwarg in kwargs.keys():
+				if kwarg in genfnposkwargs:
+					genfnkwargs[kwarg] = kwargs[kwarg]
+				elif kwarg in specgenposkwargs:
+					specgenkwargs[kwarg] = kwargs[kwarg]
+
+			self.datafile = h5py.File(self.synfilename,'w')
+			self.membergenfn = genfn
+			self.nummembers = nummembers	
+
+			# Make nummembers into an interable
+			if isinstance(self.nummembers,(int)):
+				self.nummembers = np.array([self.nummembers]*self.numcluster)
+
+
+			# CALL CREATE PHOTOSPHERE
+			for i in range(self.instances):
+				self.specinfo = specclass()
+				specclass.set_properties(**kwargs)
+				if specfn == 'member':
+
+
+				elif specfn == 'center':
+
+				elif specfn == 'spectra'
+
