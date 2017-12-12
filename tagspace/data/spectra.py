@@ -1,11 +1,15 @@
 import numpy as np 
+from tagspace.wrappers.genfns import normalgeneration
+from apogee.modelspec.turbospec import synth as tsynth
+from apogee.modelatm import atlas9
+from psm import psm
+from tagspace.wrappers.specgenfns import turbospectrum,psm
 
-class spectra(object):
-	def __init__(self):
-		return None
+class psmspectra(object):
+	def __init__(self,somestuff):
 
-	def fit(self):
-		return None
+	def from_center_spectrum(self,genfn):
 
-	def project(self):
-		return None
+	def from_center_abundances(self,genfn):
+
+	def from_member_abundances(self,abundances):
