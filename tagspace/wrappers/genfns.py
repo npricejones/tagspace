@@ -30,7 +30,7 @@ def choice2dgeneration(num=10,numprop=2,choicearray=np.ones(100,3),
 					   readdata=False,**kwargs):
 	"""
 	num:			number of values to generate
-	numprop:		number of properties per value
+	numprop:		number of properties per value (required to be 2)
 	choicearray:	array of star properties to use to generate the histogram
 					must have number of columns equal to numprop
 	readdata:		option to specify a file location for reading the 
@@ -61,7 +61,7 @@ def choice2dgeneration(num=10,numprop=2,choicearray=np.ones(100,3),
 
 
 def lineargeneration(num=10,numprop=10,slope=1,intercept=0,
-					 indeps=np.arange(10),indepfn=np.log10,**kwargs):
+					 indeps=np.arange(10),):
 	"""
 	num:			number of values to generate
 	numprop:		number of properties per value
@@ -69,10 +69,9 @@ def lineargeneration(num=10,numprop=10,slope=1,intercept=0,
 	intercept:		intercept of linear function
 	indeps:			independent variable to use (must have len num or 
 					be scalar)
-	indepfn:		function to apply to independent variable
-	**kwargs:		kwargs passed to indepfn
 
 	"""
 	if isinstance(indeps,(int,float)):
 		indeps = np.ones(num)*indeps
-	return slope*indepfn(indeps,**kwargs) + intercept
+	return slope*indeps + intercept
+

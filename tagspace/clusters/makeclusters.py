@@ -196,9 +196,11 @@ class makeclusters(object):
 	def get_photosphere(self,readdata=False,path=None,nummembers=20,
 					    params=[['TEFF','LOGG'],['VTURB']],
 					    genfns=[choice2dgeneration,lineargeneration],
-						kwargs=[{'num':10,'numprop':2,
+						kwargdicts=[{'num':10,'numprop':2,
 								  'readdata':'{0}/APOGEE/rc_teff_logg.npy'},
-								 {'num':10,'numprop':1,'indeps':'LOGG'}]):
+								 {'num':10,'numprop':1,'indeps':'LOGG',
+								  'slope':0.32,
+								  'intercept':2.48+0.1*np.random.randn(20)}]):
 		if readdata:
 			pass
 		# Make nummembers into an interable
@@ -211,11 +213,11 @@ class makeclusters(object):
 								   			dtype=[(paramlabels[0],float)]))
 		for param in range(len(params)):
 			genfn = genfns[param]
-			genresults = genfn(**kwargs[param])
+			genresults = genfn(**kwargdicts[param])
 			for p in range(len(param)):
 				# Check for possiblity that this attribute is being updated
 				try:
-					setattr(self,param[p],genresults[:,p])
+					#setattr(self,param[p],genresults[:,p])
 					self.photosphere[param[p]] = genresults[:,p]
 				except ValueError:
 					self.photosphere = append_fields(self.photosphere,
@@ -223,8 +225,15 @@ class makeclusters(object):
 		return None
 
 
-	def create_spectra(self,readdata=False,path=None,specclass=psmspectra,
-					   specfn='member',**kwargs):
+	def create_spectra(self,readdata=False,path=None,nummembers = 20,
+					   params=[['TEFF','LOGG'],['VTURB']],
+					   genfns=[choice2dgeneration,lineargeneration],
+					   kwargdicts=[{'num':10,'numprop':2,
+								'readdata':'{0}/APOGEE/rc_teff_logg.npy'},
+							   {'num':10,'numprop':1,'indeps':'LOGG',
+								'slope':0.32,
+								'intercept':2.48+0.1*np.random.randn(20)}],
+					   specclass=psmspectra,specfn='member',**kwargs):
 		"""
 		Given a generation function and its kwargs, create cluster members.
 
@@ -262,15 +271,17 @@ class makeclusters(object):
 			if isinstance(self.nummembers,(int)):
 				self.nummembers = np.array([self.nummembers]*self.numcluster)
 
+			self.get_photosphere(nummembers=self.nummembers,params=params,
+								 genfns=genfns,kwargdicts=kwargdicts)
 
-			# CALL CREATE PHOTOSPHERE
 			for i in range(self.instances):
-				self.specinfo = specclass()
-				specclass.set_properties(**kwargs)
+				self.sinfo = specclass(self.nummembers,self.photosphere)
 				if specfn == 'member':
-
+					self.spectra = self.sinfo.from_member_abundances(**kwargs)
 
 				elif specfn == 'center':
+					self.spectra = self.sinfo.from_center_abundances(**kwargs)
 
 				elif specfn == 'spectra'
+					self.spectra = self.sinfo.from_center_spectrum(**kwargs)
 
