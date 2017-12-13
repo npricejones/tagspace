@@ -20,4 +20,6 @@ clusters.get_photosphere(nummembers=mem,params=[['TEFF'],['LOGG'],['VTURB']],
 datafile = h5py.File(clusters.synfilename,'r+')
 datakey = datafile['normalgeneration'].keys()[-1]
 abundances = datafile['normalgeneration/'+datakey]
-specinfo = psmspectra(mem,clusters.photosphere)
+specinfo = psmspectra(mem,clusters.photosphere,abundances)
+specinfo.from_member_abundances(1)
+specinfo.subpolyfit(maxcores=2)
