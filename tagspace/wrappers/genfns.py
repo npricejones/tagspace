@@ -26,7 +26,7 @@ def uniformgeneration(num=10,numprop=10,minvals=-0.1*np.ones(10),
 	"""
 	return np.random.random(size=(num,numprop))*(maxvals-minvals) + minvals
 
-def choice2dgeneration(num=10,numprop=2,choicearray=np.ones(100,3),
+def choice2dgeneration(num=10,numprop=2,choicearray=np.ones((100,3)),
 					   readdata=False,**kwargs):
 	"""
 	num:			number of values to generate
