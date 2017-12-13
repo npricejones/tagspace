@@ -1,3 +1,4 @@
+import os
 import h5py
 import copy
 import inspect
@@ -60,9 +61,12 @@ class makeclusters(object):
 		# Generate data
 		elif not readdata:
 			# Assign basic class attributes
-			self.synfilename = tagdir+'synthetic_clusters/'+self.centergenfn.__name__+'/clustering_data.hdf5'
-			self.datafile = h5py.File(self.synfilename,'w')
 			self.centergenfn = genfn
+			self.synfilename = tagdir+'synthetic_clusters/centergen_'+self.centergenfn.__name__
+			if not os.path.isdir(self.synfilename):
+				os.system('mkdir -p {0}'.format(self.synfilename))
+			self.synfilename += '/clustering_data.hdf5'
+			self.datafile = h5py.File(self.synfilename,'r+')
 			self.instances = instances
 			self.numcluster = numcluster
 			self.elems = elems
@@ -81,12 +85,12 @@ class makeclusters(object):
 
 			# Data will be uniquely stored by formation timestamp, store as an 
 			# array for convenience
-			self.timestamps = np.zeros(self.instances)
+			self.timestamps = np.zeros(self.instances,dtype='S100')
 
 			# Cluster center data to be stored in one large array
 			self.centerdata= np.zeros((self.instances,self.numcluster,self.numelem))
 			# Update kwarg dictionary with parameters that are class attributes 
-			kwargs.update({'num':self.numcluster,'numelem':self.numelem})
+			kwargs.update({'num':self.numcluster,'numprop':self.numelem})
 
 			# Create cluster center abundances for each requested instance
 			for i in range(self.instances):
@@ -94,8 +98,7 @@ class makeclusters(object):
 				currenttime = gettimestr()
 				self.timestamps[i] = currenttime
 				# Generate cluster center abundances
-				clustercenters = self.centergenfn(num=self.numcluster,
-												  numelem=self.numelem,**kwargs)
+				clustercenters = self.centergenfn(**kwargs)
 				self.centerdata[i] = clustercenters
 
 				# Assign attributes to HDF5 dataset
@@ -104,7 +107,7 @@ class makeclusters(object):
 				centerinfo = self.datafile[dsetname]
 				getwrapperattrs(centerinfo,self.centergenfn,kwargdict=kwargs)
 				centerinfo.attrs['elemnames'] = self.elemnames
-				centerinfo.attrs['elemnums'] = self.elems
+				centerinfo.attrs['atmnums'] = self.elems
 			self.datafile.close()
 		return None
 
@@ -132,7 +135,7 @@ class makeclusters(object):
 			# path could specify some date info
 		elif not readdata:
 			# Assign more class attributes
-			self.datafile = h5py.File(self.synfilename,'w')
+			self.datafile = h5py.File(self.synfilename,'r+')
 			self.membergenfn = genfn
 			self.nummembers = nummembers
 
@@ -155,8 +158,8 @@ class makeclusters(object):
 				centers = self.centerdata[i]
 
 				# Create group to store data 
-				dsetname = self.membergenfn.__name__
-				if dset name not in self.datafile:
+				dsetpath = self.membergenfn.__name__
+				if dsetpath not in self.datafile:
 					instance = self.datafile.create_group(dsetpath)
 				elif dsetpath in self.datafile:
 					instance = self.datafile[dsetpath]
@@ -171,7 +174,7 @@ class makeclusters(object):
 					# parallel spot
 					label = [c]*self.nummembers[c]
 					clustermembers = self.membergenfn(num=self.nummembers[c],
-													  numelem=self.numelem,
+													  numprop=self.numelem,
 													  centers=centers, **kwargs)
 					self.members[starpos:starpos+self.nummembers[c]] = clustermembers
 					labels_true[starpos:starpos+self.nummembers[c]] = label
@@ -187,8 +190,8 @@ class makeclusters(object):
 				# Assign attributes
 				memberinfo.attrs['labels_true'] = labels_true
 				memberinfo.attrs['elemnames'] = self.elemnames
-				memberinfo.attrs['elemnums'] = self.elems
-				kwargdict.update({'num':self.nummembers,'numelem':self.numelem})
+				memberinfo.attrs['atmnums'] = self.elems
+				kwargdict.update({'num':self.nummembers,'numprop':self.numelem})
 				getwrapperattrs(memberinfo,self.membergenfn,kwargdict=kwargdict)
 			self.datafile.close()
 		return None
@@ -211,17 +214,19 @@ class makeclusters(object):
 		self.photosphere = getattr(self,'photosphere',
 								   np.zeros(np.sum(self.nummembers),
 								   			dtype=[(paramlabels[0],float)]))
+		
 		for param in range(len(params)):
 			genfn = genfns[param]
 			genresults = genfn(**kwargdicts[param])
-			for p in range(len(param)):
+			for p in range(len(params[param])):
 				# Check for possiblity that this attribute is being updated
 				try:
 					#setattr(self,param[p],genresults[:,p])
-					self.photosphere[param[p]] = genresults[:,p]
+					self.photosphere[params[param][p]] = genresults[:,p]
 				except ValueError:
 					self.photosphere = append_fields(self.photosphere,
-													 param[p],genresults[:,p])
+													 params[param][p],
+													 genresults[:,p])
 		return None
 
 
@@ -282,6 +287,6 @@ class makeclusters(object):
 				elif specfn == 'center':
 					self.spectra = self.sinfo.from_center_abundances(**kwargs)
 
-				elif specfn == 'spectra'
+				elif specfn == 'spectra':
 					self.spectra = self.sinfo.from_center_spectrum(**kwargs)
 
