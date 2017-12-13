@@ -42,7 +42,6 @@ class spectra(object):
 		return None
 
 	def pixelpolyfit(self,i):
-		print 'doing, {0}'.format(i+1)
 		stars = np.matrix(self.spectra[:,i])
 		covI = np.diag(1./self.uncertainties[:,i]**2)
 		indeps = np.dot(self.indeps.T,np.dot(covI,self.indeps))
@@ -92,6 +91,9 @@ psmeleminds = np.array([3,4,5,6,7,8,9,10,11,12,13,14,15,16,17])
 psmkeys = ['TEFF','LOGG','VTURB','C12C13']
 psmkeyinds = np.array([0,1,2,18],dtype=int)
 
+# maybe just want to assign all of the abundances psm knows about?
+# what about cases with unknown abundances?
+# then this framework makes less sense (i.e. not logical with from_center_spectrum)
 class psmspectra(spectra):
 	def __init__(self,members,photosphere,abundances):
 		super(psmspectra,self).__init__()
@@ -115,12 +117,10 @@ class psmspectra(spectra):
 		labels = np.copy(psmref) #defaults to reference point if no value given
 		labels[:3] = np.array([self.teff[star]/1000.,self.logg[star],
 							   self.vturb[star]])
-		#print labels-psmref
 		atmnums = self.abundances.attrs['atmnums']
 		for a in range(len(atmnums)):
 			if atmnums[a] in psmelems:
 				ind = psmeleminds[psmelems==atmnums[a]]
 				labels[ind] = self.abundances[:][star][a]
 		labels[18]=self.c12c13[star]
-		print labels-psmref
 		return psmgen(labels)

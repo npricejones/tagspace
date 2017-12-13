@@ -128,7 +128,6 @@ class makeclusters(object):
 
 		Returns None
 		"""
-		self.datatype = 'abundances'
 		if readdata:
 			pass
 			# call function from __init__ to get info
@@ -188,6 +187,7 @@ class makeclusters(object):
 				instance['member_abundances_{0}'.format(self.timestamps[i])] = self.members
 				memberinfo = instance['member_abundances_{0}'.format(self.timestamps[i])]
 				# Assign attributes
+				memberinfo.attrs['datatype'] = 'abundances'
 				memberinfo.attrs['labels_true'] = labels_true
 				memberinfo.attrs['elemnames'] = self.elemnames
 				memberinfo.attrs['atmnums'] = self.elems
@@ -253,7 +253,6 @@ class makeclusters(object):
 
 		Returns None
 		"""
-		self.datatype = 'spectra'
 		if readdata:
 			pass
 		elif not readdata:
@@ -280,13 +279,14 @@ class makeclusters(object):
 								 genfns=genfns,kwargdicts=kwargdicts)
 
 			for i in range(self.instances):
-				self.sinfo = specclass(self.nummembers,self.photosphere)
+				self.sinfo = specclass(self.nummembers,self.photosphere,
+									   self.abundances)
 				if specfn == 'member':
-					self.spectra = self.sinfo.from_member_abundances(**kwargs)
+					self.sinfo.from_member_abundances(**kwargs)
 
 				elif specfn == 'center':
-					self.spectra = self.sinfo.from_center_abundances(**kwargs)
+					self.sinfo.from_center_abundances(**kwargs)
 
 				elif specfn == 'spectra':
-					self.spectra = self.sinfo.from_center_spectrum(**kwargs)
+					self.sinfo.from_center_spectrum(**kwargs)
 
