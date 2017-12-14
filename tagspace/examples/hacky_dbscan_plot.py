@@ -7,6 +7,8 @@ from tagspace.clusters import external_validation
 from sklearn.cluster import DBSCAN
 from sklearn.metrics import homogeneity_completeness_v_measure
 import matplotlib.pyplot as plt
+from tqdm import tqdm
+from galpy.util import multi as ml
 
 # THEORETICAL INTRA CLUSTER SPREAD AT SNR=100                                                                                             
 # From Ting et al 2016 arxiv:1602.06947                                                                                                   
@@ -88,10 +90,13 @@ homscores = np.zeros(len(eps))
 comscores = np.zeros(len(eps))
 vscores = np.zeros(len(eps))
 
+def DBSCANwrap(i):
+    return DBSCAN(min_samples=min_samples,metric=metric,
+                  eps=eps[i]).fit_predict(specinfo.spectra)
 
-for e in range(len(eps)):
-    labels_pred[e] = DBSCAN(min_samples=min_samples,metric=metric,
-                            eps=eps[e]).fit_predict(specinfo.spectra)
+labels_pred = ml.parallel_map(DBSCANwrap,range(len(eps)),numcores=4)
+
+for e in tqdm(range(len(eps))):
     score = homogeneity_completeness_v_measure(labels_true,labels_pred[e])
     homscores[e],comscores[e],vscores[e] = score
 
