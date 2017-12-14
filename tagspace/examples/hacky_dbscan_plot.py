@@ -77,20 +77,22 @@ datakey = datafile['normalgeneration'].keys()[-1]
 abundances = datafile['normalgeneration/'+datakey]
 specinfo = psmspectra(mem,clusters.photosphere,abundances)
 # Generation + fitting takes about 10 minutes with 5000 stars
-specinfo.from_member_abundances(1)
+specinfo.from_member_abundances(1) # < 1 min
+print 'Done spectra form'
 specinfo.subpolyfit(maxcores=4,indeplabels=['TEFF','LOGG'],
                    crossinds='all',degree=2,uncertainties=1)
-
+print 'Done fit'
 labels_true = abundances.attrs['labels_true']
 metric = 'euclidean'
 min_samples = 10
-eps = np.arange(0.1,3.0,0.1)
+eps = np.arange(0.1,2.75,0.25)
 labels_pred = -np.ones((len(eps),mem))
 homscores = np.zeros(len(eps))
 comscores = np.zeros(len(eps))
 vscores = np.zeros(len(eps))
 
 def DBSCANwrap(i):
+    print 'starting {0} of {1}'.format(i+1,len(eps))
     return DBSCAN(min_samples=min_samples,metric=metric,
                   eps=eps[i]).fit_predict(specinfo.spectra)
 
@@ -100,7 +102,7 @@ for e in tqdm(range(len(eps))):
     score = homogeneity_completeness_v_measure(labels_true,labels_pred[e])
     homscores[e],comscores[e],vscores[e] = score
 
-plt.figure(figsize=(15,8))
+plt.figure(figsize=(15,6))
 plt.subplot(131)
 plt.semilogx(eps,homscores)
 plt.xlabel('epsilon')
@@ -113,6 +115,13 @@ plt.subplot(133)
 plt.semilogx(eps,vscores)
 plt.xlabel('epsilon')
 plt.ylabel('harmonic mean')
+plt.savefig('scores.pdf')
+
+plt.figure(figsize=(15,10))
+plt.subplot(111)
+plt.imshow(specinfo.spectra,cmap='bwr',aspect=specinfo.spectra.shape[1]/float(specinfo.spectra.shape[0]),vmin=-0.5,vmax=0.5)
+plt.colorbar()
+plt.savefig('spectra2d.pdf')
 
 
 
