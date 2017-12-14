@@ -66,7 +66,10 @@ class makeclusters(object):
 			if not os.path.isdir(self.synfilename):
 				os.system('mkdir -p {0}'.format(self.synfilename))
 			self.synfilename += '/clustering_data.hdf5'
-			self.datafile = h5py.File(self.synfilename,'r+')
+			if os.path.isfile(self.synfilename):
+				self.datafile = h5py.File(self.synfilename,'r+')
+			elif not os.path.isfile(self.synfilename):
+				self.datafile = h5py.File(self.synfilename,'w')
 			self.instances = instances
 			self.numcluster = numcluster
 			self.elems = elems
@@ -174,7 +177,7 @@ class makeclusters(object):
 					label = [c]*self.nummembers[c]
 					clustermembers = self.membergenfn(num=self.nummembers[c],
 													  numprop=self.numelem,
-													  centers=centers, **kwargs)
+													  centers=centers[c], **kwargs)
 					self.members[starpos:starpos+self.nummembers[c]] = clustermembers
 					labels_true[starpos:starpos+self.nummembers[c]] = label
 					starpos+= self.nummembers[c]
