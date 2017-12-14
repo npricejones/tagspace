@@ -3,6 +3,7 @@ import numpy as np
 from tagspace.clusters.makeclusters import makeclusters
 from tagspace.wrappers.genfns import normalgeneration
 from tagspace.data.spectra import psmspectra
+from sklearn.clusters import DBSCAN
 
 clusters = makeclusters()
 
