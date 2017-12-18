@@ -13,7 +13,7 @@ from numpy.lib.recfunctions import append_fields
 from tagspace.wrappers.genfns import normalgeneration,choice2dgeneration,lineargeneration
 #from tagspace.data.spectra import spectra
 
-class makeclusters(object):
+class cluster_data(object):
 	"""
 	Used to generate synthetic cluster abundances and spectra.
 	"""
@@ -199,7 +199,7 @@ class makeclusters(object):
 
 
 
-class abundances(makeclusters):
+class cluster_abundances(cluster_data):
 
 	def __init__(self):
 		self.membertype='abundances'
@@ -263,7 +263,7 @@ class abundances(makeclusters):
 		genfn:		Function used to find cluster member abundances 
 					(defaults to choosing from a normal distribution)
 		nummembers:	Number of stars per cluster; integer or iterable of 
-					integers with length of makeclusters.numclusters
+					integers with length of cluster_data.numclusters
 		readdata:	Boolean that looks for existing data if set True 
 					(redundant with filename******)
 		path:		Some information about where to get files ********
@@ -331,7 +331,7 @@ class abundances(makeclusters):
 				instance['member_abundances_{0}'.format(self.timestamps[i])] = self.members
 				memberinfo = instance['member_abundances_{0}'.format(self.timestamps[i])]
 				# Assign attributes
-				memberinfo.attrs['datatype'] = 'abundances'
+				memberinfo.attrs['datatype'] = self.membertype
 				memberinfo.attrs['labels_true'] = labels_true
 				memberinfo.attrs['elemnames'] = self.elemnames
 				memberinfo.attrs['atmnums'] = self.elems
@@ -342,14 +342,46 @@ class abundances(makeclusters):
 
 
 
-class spectra(makeclusters):
+class cluster_spectra(cluster_data):
 
 	def __init__(self):
+		self.membertype='spectra'
 		return None
 
-	def get_centers(self,genfn=self.abundances().get_centers,**kwargs):
+	def get_centers(self,genfn=normalgeneration,**kwargs):
 		return None
 
 	def get_members(self,genfn=normalgeneration,**kwargs):
 		return None
+
+
+class psmspectra(cluster_spectra):
+	def __init__(self,members,photosphere,abundances):
+		super(psmspectra,self).__init__()
+		self.nummembers = members
+		self.abundances = abundances
+		for k in range(len(psmkeys)):
+			try:
+				setattr(self,psmkeys[k].lower(),photosphere[psmkeys[k]])
+			except ValueError:
+				setattr(self,psmkeys[k].lower(),
+					    np.ones(self.nummembers)*psmref[psmkeyinds[k]])
+
+	def genspec(self,star):
+		"""
+		star:		index of abundances to use for spectra creation
+					must match indexes of photosphere array in init
+
+		returns 1 APOGEE-like (7214) spectrum 
+		"""
+		labels = np.copy(psmref) #defaults to reference point if no value given
+		labels[:3] = np.array([self.teff[star]/1000.,self.logg[star],
+							   self.vturb[star]])
+		atmnums = self.abundances.attrs['atmnums']
+		for a in range(len(atmnums)):
+			if atmnums[a] in psmelems:
+				ind = psmeleminds[psmelems==atmnums[a]]
+				labels[ind] = self.abundances[:][star][a]
+		labels[18]=self.c12c13[star]
+		return psmgen(labels)
 
