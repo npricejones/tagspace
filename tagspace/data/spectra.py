@@ -1,5 +1,6 @@
 import numpy as np 
 from tagspace.wrappers.genfns import normalgeneration
+from tagspace.clusters.makeclusters import makeclusters
 #from apogee.modelspec.turbospec import synth as tsynth
 #from apogee.modelatm import atlas9
 from psm import generate_spectrum as psmgen
