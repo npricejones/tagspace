@@ -82,7 +82,8 @@ class spectra(object):
 	def project(self):
 		return None # project spectra onto array or read it from file to proj
 
-	def addnoise(self):
+	def addnoise(self,noisegen,**kwargs):
+                self.spectra += noisegen(**kwargs)
 		return None
 
 
