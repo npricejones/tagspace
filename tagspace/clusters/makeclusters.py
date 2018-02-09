@@ -62,7 +62,7 @@ class makeclusters(object):
 		elif not readdata:
 			# Assign basic class attributes
 			self.centergenfn = genfn
-			self.synfilename = tagdir+'synthetic_clusters/centergen_'+self.centergenfn.__name__
+			self.synfilename = tagdir+'/synthetic_clusters/centergen_'+self.centergenfn.__name__
 			if not os.path.isdir(self.synfilename):
 				os.system('mkdir -p {0}'.format(self.synfilename))
 			self.synfilename += '/clustering_data.hdf5'
@@ -116,7 +116,7 @@ class makeclusters(object):
 
 
 	def create_abundances(self,genfn=normalgeneration,nummembers=20,
-						  readdata=False,path=None,**kwargs):
+                              readdata=False,path=None,**kwargs):
 		"""
 		Given a generation function and its kwargs, create cluster members.
 
@@ -145,12 +145,13 @@ class makeclusters(object):
 			if isinstance(self.nummembers,(int)):
 				self.nummembers = np.array([self.nummembers]*self.numcluster)
 
+                        print np.sum(self.nummembers).astype(float)
 			# Create holder arrays
 			self.abundances = np.zeros((self.instances,
-										np.sum(self.nummembers),
-										self.numelem))
+                                                    np.sum(self.nummembers),
+                                                    self.numelem))
 			self.labels_true = -np.ones((self.instances,
-										 np.sum(self.nummembers)))
+                                                     np.sum(self.nummembers)),dtype=int)
 			
 			# Deep copy kwargs so it can be updated with user specified kwargs
 			kwargdict = copy.deepcopy(kwargs)
@@ -168,16 +169,17 @@ class makeclusters(object):
 
 				# Create array to store members and true labels
 				self.members = np.zeros((np.sum(self.nummembers),self.numelem))
-				labels_true = -np.ones(np.sum(self.nummembers))
+				labels_true = -np.ones(np.sum(self.nummembers),dtype=int)
 				
 				# Create members for each cluster
 				starpos = 0
+                                print len(centers)
 				for c in range(len(centers)):
 					# parallel spot
 					label = [c]*self.nummembers[c]
 					clustermembers = self.membergenfn(num=self.nummembers[c],
-													  numprop=self.numelem,
-													  centers=centers[c], **kwargs)
+                                                                          numprop=self.numelem,
+                                                                          centers=centers[c], **kwargs)
 					self.members[starpos:starpos+self.nummembers[c]] = clustermembers
 					labels_true[starpos:starpos+self.nummembers[c]] = label
 					starpos+= self.nummembers[c]
@@ -188,10 +190,10 @@ class makeclusters(object):
 
 				# Create data set in file
 				instance['member_abundances_{0}'.format(self.timestamps[i])] = self.members
+                                instance['labels_true_{0}'.format(self.timestamps[i])] = labels_true
 				memberinfo = instance['member_abundances_{0}'.format(self.timestamps[i])]
 				# Assign attributes
 				memberinfo.attrs['datatype'] = 'abundances'
-				memberinfo.attrs['labels_true'] = labels_true
 				memberinfo.attrs['elemnames'] = self.elemnames
 				memberinfo.attrs['atmnums'] = self.elems
 				kwargdict.update({'num':self.nummembers,'numprop':self.numelem})
@@ -210,13 +212,14 @@ class makeclusters(object):
 		if readdata:
 			pass
 		# Make nummembers into an interable
-		if isinstance(self.nummembers,(int)):
+		self.nummembers = nummembers
+                if isinstance(self.nummembers,(int)):
 			self.nummembers = np.array([self.nummembers]*self.numcluster)
 		paramlabels =  [x.upper() for sublist in params for x in sublist]
 		# If self.photosphere doesn't exist, initlialize it
 		self.photosphere = getattr(self,'photosphere',
-								   np.zeros(np.sum(self.nummembers),
-								   			dtype=[(paramlabels[0],float)]))
+                                           np.zeros(np.sum(self.nummembers),
+                                                    dtype=[(paramlabels[0],float)]))
 		
 		for param in range(len(params)):
 			genfn = genfns[param]
@@ -228,8 +231,8 @@ class makeclusters(object):
 					self.photosphere[params[param][p]] = genresults[:,p]
 				except ValueError:
 					self.photosphere = append_fields(self.photosphere,
-													 params[param][p],
-													 genresults[:,p])
+                                                                         params[param][p],
+                                                                         genresults[:,p])
 		return None
 
 
@@ -279,11 +282,11 @@ class makeclusters(object):
 				self.nummembers = np.array([self.nummembers]*self.numcluster)
 
 			self.get_photosphere(nummembers=self.nummembers,params=params,
-								 genfns=genfns,kwargdicts=kwargdicts)
-
+                                             genfns=genfns,kwargdicts=kwargdicts)
+                        
 			for i in range(self.instances):
 				self.sinfo = specclass(self.nummembers,self.photosphere,
-									   self.abundances)
+                                                       self.abundances)
 				if specfn == 'member':
 					self.sinfo.from_member_abundances(**kwargs)
 

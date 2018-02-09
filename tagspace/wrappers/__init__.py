@@ -12,8 +12,15 @@ def getwrapperattrs(group,callable,kwargdict={'num':10}):
 	if arglen > 0:
 		warnings.warn('This function has non-keyword arguments and not all reproduction information will be stored')
 	for i in range(len(defaults)):
+                print 'adding attribute {0}'.format(allargs[i+arglen])
 		if allargs[i+arglen] in kwargdict.keys():
-			group.attrs['{0}'.format(allargs[i+arglen])] = kwargdict[allargs[i+arglen]]
+                        try:
+                                group.attrs['{0}'.format(allargs[i+arglen])] = kwargdict[allargs[i+arglen]]
+                        except RuntimeError:
+                                pass
 		elif allargs[i+arglen] not in kwargdict.keys():
-			group.attrs['{0}'.format(allargs[i+arglen])] = defaults[i]
+			try:
+                                group.attrs['{0}'.format(allargs[i+arglen])] = defaults[i]
+                        except RuntimeError:
+                                pass
 	return None

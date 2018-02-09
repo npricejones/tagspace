@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 from tagspace.wrappers.genfns import normalgeneration
 #from apogee.modelspec.turbospec import synth as tsynth
 #from apogee.modelatm import atlas9
@@ -13,22 +13,23 @@ class spectra(object):
 	def __init__(self):
 		return None
 
-	def from_center_spectrum(self,centerspec,genfn=normalgeneration):
+	def from_center_abundances(self,centerabundances,membership,maxcores):
+                self.abundances = np.repeat(centerabundances,membership,axis=0)
+                
+                self.spectra = np.array(ml.parallel_map(self.genspec,
+                                                        range(self.nummembers),
+                                                        numcores=maxcores))
 
 		return None
 
-	def from_center_abundances(self,centerspec,genfn=normalgeneration):
-
-		return None
-
-	def from_member_abundances(self,maxcores):
+	def from_member_abundances(self,memberabundances,maxcores):
 		"""
 		abundances:		h5py dataset with attribute atmnum specifying the
 						atomic number of each column
 		"""
 		self.spectra = np.array(ml.parallel_map(self.genspec,
-												range(self.nummembers),
-										  		numcores=maxcores))
+                                                        range(self.nummembers),
+                                                        numcores=maxcores))
 		return None
 
 
@@ -58,15 +59,15 @@ class spectra(object):
 		self.savecoeff = savecoeff
 		if isinstance(uncertainties,(int,float)):
 			uncertainties = uncertainties*np.ones((self.nummembers,
-												   self.specdim))
+                                                               self.specdim))
 		self.uncertainties = uncertainties
 		self.polyindeps(degree=degree,indeplabels=indeplabels)
 		if isinstance(crossinds,(list,np.ndarray)):
 			pass # restrict self.indeps
 		if not isinstance(givencoeff,(np.ndarray,str)):
 			self.fitspec = np.array(ml.parallel_map(self.pixelpolyfit,
-													range(self.specdim),
-										  			numcores=maxcores))
+                                                                range(self.specdim),
+                                                                numcores=maxcores))
 			self.fitspec = self.fitspec.T
 		elif isinstance(givencoeff,str):
 			pass #read out coeff
@@ -95,11 +96,11 @@ psmkeyinds = np.array([0,1,2,18],dtype=int)
 # what about cases with unknown abundances?
 # then this framework makes less sense (i.e. not logical with from_center_spectrum)
 class psmspectra(spectra):
-	def __init__(self,members,photosphere,abundances):
+	def __init__(self,members,photosphere,atmnums):
 		super(psmspectra,self).__init__()
 		self.nummembers = members
 		self.specdim = 7214
-		self.abundances = abundances
+                self.atmnums = atmnums
 		for k in range(len(psmkeys)):
 			try:
 				setattr(self,psmkeys[k].lower(),photosphere[psmkeys[k]])
@@ -117,10 +118,9 @@ class psmspectra(spectra):
 		labels = np.copy(psmref) #defaults to reference point if no value given
 		labels[:3] = np.array([self.teff[star]/1000.,self.logg[star],
 							   self.vturb[star]])
-		atmnums = self.abundances.attrs['atmnums']
-		for a in range(len(atmnums)):
-			if atmnums[a] in psmelems:
-				ind = psmeleminds[psmelems==atmnums[a]]
+		for a in range(len(self.atmnums)):
+			if self.atmnums[a] in psmelems:
+				ind = psmeleminds[psmelems==self.atmnums[a]]
 				labels[ind] = self.abundances[:][star][a]
 		labels[18]=self.c12c13[star]
 		return psmgen(labels)
