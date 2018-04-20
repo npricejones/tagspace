@@ -14,6 +14,19 @@ def normalgeneration(num=10,numprop=10,centers=np.zeros(10),
 	return np.random.randn(num,numprop)*stds + centers
 
 
+def choosestruct(num=10,numprop=10,sample='data.npy',propkeys=['C_H','N_H']):
+        if callable(sample):
+                data = sample()
+        elif isinstance(sample,str):
+                data = np.load(sample)
+        inds = np.random.randint(0,high=len(data),size=num)
+        d = data[inds]
+        output = np.zeros((num,numprop))
+        for i in range(numprop):
+                output[:,i] = d[propkeys[i]]
+       
+        return output
+
 def uniformgeneration(num=10,numprop=10,minvals=-0.1*np.ones(10),
 					  maxvals=0.1*np.ones(10)):
 	"""
