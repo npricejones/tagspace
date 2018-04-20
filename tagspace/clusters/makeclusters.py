@@ -145,7 +145,7 @@ class makeclusters(object):
          if isinstance(self.nummembers,(int)):
             self.nummembers = np.array([self.nummembers]*self.numcluster)
 
-                        print np.sum(self.nummembers).astype(float)
+            print(np.sum(self.nummembers).astype(float))
          # Create holder arrays
          self.abundances = np.zeros((self.instances,
                                                     np.sum(self.nummembers),
@@ -173,7 +173,7 @@ class makeclusters(object):
             
             # Create members for each cluster
             starpos = 0
-                                print len(centers)
+            print(len(centers))
             for c in range(len(centers)):
                # parallel spot
                label = [c]*self.nummembers[c]
@@ -190,7 +190,7 @@ class makeclusters(object):
 
             # Create data set in file
             instance['member_abundances_{0}'.format(self.timestamps[i])] = self.members
-                                instance['labels_true_{0}'.format(self.timestamps[i])] = labels_true
+            instance['labels_true_{0}'.format(self.timestamps[i])] = labels_true
             memberinfo = instance['member_abundances_{0}'.format(self.timestamps[i])]
             # Assign attributes
             memberinfo.attrs['datatype'] = 'abundances'
@@ -213,7 +213,7 @@ class makeclusters(object):
          pass
       # Make nummembers into an interable
       self.nummembers = nummembers
-                if isinstance(self.nummembers,(int)):
+      if isinstance(self.nummembers,(int)):
          self.nummembers = np.array([self.nummembers]*self.numcluster)
       paramlabels =  [x.upper() for sublist in params for x in sublist]
       # If self.photosphere doesn't exist, initlialize it
