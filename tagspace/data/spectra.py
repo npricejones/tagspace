@@ -14,11 +14,11 @@ class spectra(object):
       return None
 
    def from_center_abundances(self,centerabundances,membership,maxcores):
-                self.abundances = np.repeat(centerabundances,membership,axis=0)
-                
-                self.spectra = np.array(ml.parallel_map(self.genspec,
-                                                        range(self.nummembers),
-                                                        numcores=maxcores))
+      self.abundances = np.repeat(centerabundances,membership,axis=0)
+      
+      self.spectra = np.array(ml.parallel_map(self.genspec,
+                                              range(self.nummembers),
+                                              numcores=maxcores))
 
       return None
 
@@ -28,8 +28,8 @@ class spectra(object):
                   atomic number of each column
       """
       self.spectra = np.array(ml.parallel_map(self.genspec,
-                                                        range(self.nummembers),
-                                                        numcores=maxcores))
+                                              range(self.nummembers),
+                                              numcores=maxcores))
       return None
 
 
@@ -83,7 +83,7 @@ class spectra(object):
       return None # project spectra onto array or read it from file to proj
 
    def addnoise(self,noisegen,**kwargs):
-                self.spectra += noisegen(**kwargs)
+      self.spectra += noisegen(**kwargs)
       return None
 
 
@@ -101,7 +101,7 @@ class psmspectra(spectra):
       super(psmspectra,self).__init__()
       self.nummembers = members
       self.specdim = 7214
-                self.atmnums = atmnums
+      self.atmnums = atmnums
       for k in range(len(psmkeys)):
          try:
             setattr(self,psmkeys[k].lower(),photosphere[psmkeys[k]])
