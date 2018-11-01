@@ -63,13 +63,13 @@ class makeclusters(object):
          # Assign basic class attributes
          self.centergenfn = genfn
          self.synfilename = tagdir+'/synthetic_clusters/centergen_'+self.centergenfn.__name__
-         if not os.path.isdir(self.synfilename):
-            os.system('mkdir -p {0}'.format(self.synfilename))
+         #if not os.path.isdir(self.synfilename):
+         #   os.system('mkdir -p {0}'.format(self.synfilename))
          self.synfilename += '/clustering_data.hdf5'
-         if os.path.isfile(self.synfilename):
-            self.datafile = h5py.File(self.synfilename,'r+')
-         elif not os.path.isfile(self.synfilename):
-            self.datafile = h5py.File(self.synfilename,'w')
+         #if os.path.isfile(self.synfilename):
+         #   self.datafile = h5py.File(self.synfilename,'r+')
+         #elif not os.path.isfile(self.synfilename):
+         #   self.datafile = h5py.File(self.synfilename,'w')
          self.instances = instances
          self.numcluster = numcluster
          self.elems = elems
@@ -105,13 +105,13 @@ class makeclusters(object):
             self.centerdata[i] = clustercenters
 
             # Assign attributes to HDF5 dataset
-            dsetname = 'center_abundances_{0}'.format(currenttime)
-            self.datafile[dsetname] = clustercenters
-            centerinfo = self.datafile[dsetname]
-            getwrapperattrs(centerinfo,self.centergenfn,kwargdict=kwargs)
-            centerinfo.attrs['elemnames'] = self.elemnames
-            centerinfo.attrs['atmnums'] = self.elems
-         self.datafile.close()
+            #dsetname = 'center_abundances_{0}'.format(currenttime)
+            #self.datafile[dsetname] = clustercenters
+            #centerinfo = self.datafile[dsetname]
+            #getwrapperattrs(centerinfo,self.centergenfn,kwargdict=kwargs)
+            #centerinfo.attrs['elemnames'] = self.elemnames
+            #centerinfo.attrs['atmnums'] = self.elems
+         #self.datafile.close()
       return None
 
 
@@ -137,7 +137,7 @@ class makeclusters(object):
          # path could specify some date info
       elif not readdata:
          # Assign more class attributes
-         self.datafile = h5py.File(self.synfilename,'r+')
+         #self.datafile = h5py.File(self.synfilename,'r+')
          self.membergenfn = genfn
          self.nummembers = nummembers
 
@@ -161,11 +161,11 @@ class makeclusters(object):
             centers = self.centerdata[i]
 
             # Create group to store data 
-            dsetpath = self.membergenfn.__name__
-            if dsetpath not in self.datafile:
-               instance = self.datafile.create_group(dsetpath)
-            elif dsetpath in self.datafile:
-               instance = self.datafile[dsetpath]
+            #dsetpath = self.membergenfn.__name__
+            #if dsetpath not in self.datafile:
+            #   instance = self.datafile.create_group(dsetpath)
+            #elif dsetpath in self.datafile:
+            #   instance = self.datafile[dsetpath]
 
             # Create array to store members and true labels
             self.members = np.zeros((np.sum(self.nummembers),self.numelem))
@@ -198,7 +198,7 @@ class makeclusters(object):
             memberinfo.attrs['atmnums'] = self.elems
             kwargdict.update({'num':self.nummembers,'numprop':self.numelem})
             getwrapperattrs(memberinfo,self.membergenfn,kwargdict=kwargdict)
-         self.datafile.close()
+         #self.datafile.close()
       return None
 
    def get_photosphere(self,readdata=False,path=None,nummembers=20,
@@ -273,7 +273,7 @@ class makeclusters(object):
             elif kwarg in specgenposkwargs:
                specgenkwargs[kwarg] = kwargs[kwarg]
 
-         self.datafile = h5py.File(self.synfilename,'w')
+         #self.datafile = h5py.File(self.synfilename,'w')
          self.membergenfn = genfn
          self.nummembers = nummembers  
 
